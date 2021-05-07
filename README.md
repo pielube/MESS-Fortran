@@ -1,7 +1,7 @@
 # MESS-Fortran
 ### Multi Energy Systems Simulator - Fortran version
 
-This version of MESS can be used to solve multiple independent units (no local grid) each one composed by up to 100 technologies.
+This version of MESS can be used to solve multiple independent (i.e. with no local grid) units, each one composed by up to 100 technologies.
 An example of application of the code can be found [here](https://doi.org/10.1051/e3sconf/202019701006).
 
 
