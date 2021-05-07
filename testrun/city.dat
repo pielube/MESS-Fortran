@@ -1,0 +1,4 @@
+1           # Simulation starting time
+8760        # Simulation ending time
+1           # Number of buildings
+Casa1       # Buildings' name

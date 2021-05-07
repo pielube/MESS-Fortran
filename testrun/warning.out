@@ -1,0 +1,13 @@
+
+     *********************************************************
+
+          PROGRAM:  "MESS: Multi Energy System Simulator"
+          Version:  0.01.00.a
+          Release date: 31/03/2021 [dd/mm/yyyy]
+
+     *********************************************************
+
+
+ Machine precision: Single-> Eps = 10^-06
+                    Double-> EpsD= 10^-15
+
