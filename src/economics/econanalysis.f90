@@ -9,12 +9,12 @@ subroutine econanalysis(enExpendComplete,       & ! (I) Electrical energy expend
                         TotActInvest)             ! (O) Total actualized investment
 
 
-      USE MODparam, ONLY: NdayYear,NhourDay,NhourYear,Nyears,Nstep,MaxComp,MaxBuild,MaxGiorni,MaxHours
+      USE MODparam, ONLY: NdayYear,NhourDay,NhourYear,Nyears,Nstep,MaxComp,Maxloc,MaxGiorni,MaxHours
 
       implicit real(8) (a-h,o-z), integer(i-n)
 
       real(8), dimension(MaxHours),             intent(IN   ):: enExpendComplete,enExpendGasComplete
-      real(8), dimension( 13,MaxComp,MaxBuild), intent(IN   ):: DataEconAn 
+      real(8), dimension( 13,MaxComp,Maxloc), intent(IN   ):: DataEconAn 
       real(8), dimension(0:MaxGiorni),          intent(  OUT):: curveNPV
       real(8),                                  intent(  OUT):: TotActInvest
                
@@ -24,8 +24,8 @@ subroutine econanalysis(enExpendComplete,       & ! (I) Electrical energy expend
 
       ! DataEconAn description 
       ! First index:  1- ID component, 2- Number of substitutions, 3- Components CAPEX, 4 to 13- Year in which it will be substituted
-      ! Second index: Which component of the building
-      ! Third index:  Which building
+      ! Second index: Which component of the location
+      ! Third index:  Which location
 
 
       ! Daily interest rate
@@ -48,7 +48,7 @@ subroutine econanalysis(enExpendComplete,       & ! (I) Electrical energy expend
 
       ! Adding CAPEX costs to the daily expenditure
 
-      do jj=1,MaxBuild ! Iterating on the buildings
+      do jj=1,Maxloc ! Iterating on the locations
         do ii=1,MaxComp !Iterating on the components
 
           ID = DataEconAn(1,ii,jj) !tipo del componente

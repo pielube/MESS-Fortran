@@ -13,7 +13,7 @@ subroutine SimpleBattery(CapacityNom,    & ! (I)  Capacity of the battery     [k
                          CapexSimpBatt)    ! (O)  Battery cost                [eur]
 
 
-      USE MODcoord,       ONLY: icase,iyear,itime,ibuild,itimeperweek,itimeperday
+      USE MODcoord,       ONLY: icase,iyear,itime,iloc,itimeperweek,itimeperday
       USE MODambient,     ONLY: TempAmb
       USE MODParam,       ONLY: timestep,NhourDay,NhourWeek,NhourYear,Runiv,eNepero
       USE MODGlobalParam, ONLY: IndAgeing
@@ -39,7 +39,7 @@ subroutine SimpleBattery(CapacityNom,    & ! (I)  Capacity of the battery     [k
       else
       endif
 
-      Capacity       = CapacityNom*SoHBattery(ibuild) ! [kWh]
+      Capacity       = CapacityNom*SoHBattery(iloc) ! [kWh]
       StartingCharge = Capacity*SoC                   ! [kWh] Charge at beginning if timestep
       SoCInitial     = StartingCharge/Capacity        ! [-] Initial SoC
       ChargeMin      = 1.d0 - DoD                     ! [-]
@@ -148,10 +148,10 @@ subroutine SimpleBattery(CapacityNom,    & ! (I)  Capacity of the battery     [k
       ! Option 1 - No calendar ageing
       !ccal1 = 0.d0 
       ! Option 2 - Always calendar ageing
-      ccal1 = (RateCapacityFade * (1.d0 + 1.d0 - SOHBattery(ibuild))**(-alphaTemp)) * timestep*10.d0/24.d0
+      ccal1 = (RateCapacityFade * (1.d0 + 1.d0 - SOHBattery(iloc))**(-alphaTemp)) * timestep*10.d0/24.d0
       ! Option 3 - Calendar ageing only when no cycle ageing
       !if(SoC.eq.SoCInitial)then
-      !  ccal1 = (RateCapacityFade * (1.d0 + 1.d0 - SOHBattery(ibuild))**(-alphaTemp)) * timestep*10.d0/24.d0
+      !  ccal1 = (RateCapacityFade * (1.d0 + 1.d0 - SOHBattery(iloc))**(-alphaTemp)) * timestep*10.d0/24.d0
       !else
       !  ccal1 = 0.d0
       !endif
@@ -171,15 +171,15 @@ subroutine SimpleBattery(CapacityNom,    & ! (I)  Capacity of the battery     [k
       
       if(IndAgeing.eq.1 .and. icase.eq.1) then  ! icase = 1 dovrebbe essere ridondante, se non è 0 non siamo qui dentro
         ! Ageing active and not baseline case, then storing SoC for each week hour
-        WeeklyChargeHist(itimeperweek,ibuild) = SoC
+        WeeklyChargeHist(itimeperweek,iloc) = SoC
 
         if(itimeperweek .eq. NhourWeek) then
           ! A week has passed and has been stored, call battery cyclic ageing
-          call batteryageing(WeeklyChargeHist(:,ibuild),ccyc(ibuild),Damage)
-          WeeklyChargeHist(:,ibuild) = 0.d0 ! Reinitializing weekly charge history
+          call batteryageing(WeeklyChargeHist(:,iloc),ccyc(iloc),Damage)
+          WeeklyChargeHist(:,iloc) = 0.d0 ! Reinitializing weekly charge history
 
           if(itimeperday .eq. NhourDay)then
-            ccal(ibuild) = ccal(ibuild)+ccal2
+            ccal(iloc) = ccal(iloc)+ccal2
             ccal2 = 0.d0    
           else
           endif  
@@ -192,26 +192,26 @@ subroutine SimpleBattery(CapacityNom,    & ! (I)  Capacity of the battery     [k
 
       ! Save ccal and ccyc contributions to first substituition and save results
       if(iswitch .ne. 1)then
-        if((ccyc(ibuild)*0.3d0 + ccal(ibuild)) .gt. 0.3d0)then
-          totalccal=ccal(ibuild)
-          totalccyc=ccyc(ibuild)*0.3d0
+        if((ccyc(iloc)*0.3d0 + ccal(iloc)) .gt. 0.3d0)then
+          totalccal=ccal(iloc)
+          totalccyc=ccyc(iloc)*0.3d0
           iswitch=1
         else
         endif
       else
       endif
 
-      SOHBattery(ibuild) = 1.d0 - ccyc(ibuild)*0.3d0 - ccal(ibuild) 
+      SOHBattery(iloc) = 1.d0 - ccyc(iloc)*0.3d0 - ccal(iloc) 
 
 
       ! >>>TEMP: grafici
       tempNumber = (itime+(iyear-1)*Nhouryear)/(Nhourweek)
       if(tempNumber - dble(int(tempNumber)) .lt. 0.00001)then
-        SOHtempbis(int(tempNumber)+1) = SOHBattery(ibuild)
+        SOHtempbis(int(tempNumber)+1) = SOHBattery(iloc)
       else
       endif
 
-      SOHtemp(itime+(iyear-1)*Nhouryear)=SOHBattery(ibuild)
+      SOHtemp(itime+(iyear-1)*Nhouryear)=SOHBattery(iloc)
       ! >>>TEMP: grafici
 
 

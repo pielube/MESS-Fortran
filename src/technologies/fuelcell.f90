@@ -17,7 +17,7 @@ Subroutine FuelCell(DeltaEnergy,       & ! (I)  electrical energy balance     [k
                     FCStackCapex,      & ! (O) FC capex [eur]
                     FCStackOpex)         ! (O) FC opex [eur/y]
 
-      USE MODcoord,    ONLY: ibuild                       
+      USE MODcoord,    ONLY: iloc                       
       USE MODParam,    ONLY: timestep,FaradayConst,Runiv,eNepero,LHVh2,H2MolMass,deltaG0,Pstandard,Tstandard,HHVh2,HHVh2Mol,rhoStdh2
       USE MODfuelcell, ONLY: iswitchfuelcell,coeffAfc,coeffBfc                                                       
                   
@@ -46,7 +46,7 @@ Subroutine FuelCell(DeltaEnergy,       & ! (I)  electrical energy balance     [k
                   
       ! richiamo la subroutine che mi calcola i coefficienti della retta
 
-      if(iswitchfuelcell(ibuild).eq.0)then
+      if(iswitchfuelcell(iloc).eq.0)then
    
         call Coefficients_FC(FC_CellNumber,      & ! (I) n° of fuel cells              [-]
                              FC_MinCurrDens,     & ! (I) FC min. current density       [A/cm^2]
@@ -59,10 +59,10 @@ Subroutine FuelCell(DeltaEnergy,       & ! (I)  electrical energy balance     [k
                              FC_AnodeCurrDens,   & ! (I) Cell mositure content         [-]
                              FC_CathodeCurrDens, & ! (I)[A/cm^2]
                              Lambda,             & ! (I)[A/cm^2]      
-                             coeffAfc(ibuild),            & ! (O) grade 0 coeff [-]
-                             coeffBfc(ibuild))              ! (O) grade 1 coeff [-]
+                             coeffAfc(iloc),            & ! (O) grade 0 coeff [-]
+                             coeffBfc(iloc))              ! (O) grade 1 coeff [-]
 
-        iswitchfuelcell(ibuild) = 1
+        iswitchfuelcell(iloc) = 1
 
       else
       endif
@@ -82,10 +82,10 @@ Subroutine FuelCell(DeltaEnergy,       & ! (I)  electrical energy balance     [k
 
       ! Finding the working point of the electrolyzer by explicitly solving the system:
       ! ReqPower=FC_CellCurrDensity*FC_CellArea*FC_Vstack
-      ! FC_Vstack=coeffBfc(ibuild)*FC_CellCurrDensity+coeffAfc(ibuild)
+      ! FC_Vstack=coeffBfc(iloc)*FC_CellCurrDensity+coeffAfc(iloc)
         
-      FC_CellCurrDensity = (-coeffAfc(ibuild)+SQRT(coeffAfc(ibuild)**2.d0+4.d0*coeffBfc(ibuild)*(ReqPower*1000.d0/FC_CellArea)))/(2.d0*coeffBfc(ibuild))  ! [A/cm^2]
-      FC_Vstack=coeffBfc(ibuild)*FC_CellCurrDensity+coeffAfc(ibuild)
+      FC_CellCurrDensity = (-coeffAfc(iloc)+SQRT(coeffAfc(iloc)**2.d0+4.d0*coeffBfc(iloc)*(ReqPower*1000.d0/FC_CellArea)))/(2.d0*coeffBfc(iloc))  ! [A/cm^2]
+      FC_Vstack=coeffBfc(iloc)*FC_CellCurrDensity+coeffAfc(iloc)
 
       CellCurr = FC_CellCurrDensity*FC_CellArea  ![A]        
         

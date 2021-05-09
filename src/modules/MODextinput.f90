@@ -7,7 +7,7 @@
 
 module MODGlobalParam
 
-  integer :: RefYear,IndAgeing
+  integer :: RefYear,iTimeStart,iTimeEnd,IndAgeing
 
 endmodule MODGlobalParam
 
@@ -92,26 +92,25 @@ Module MODprices
 end Module MODprices
 
 
-! City info module
+! aggregate info module
 
-module MODcity
+module MODAggr
 
-  USE MODparam, ONLY: MaxBuild
+  USE MODparam, ONLY: Maxloc
 
-  integer :: iTimeStart,iTimeEnd                  ! Starting and ending timesteps
-  integer :: Nbuild                               ! Number of buildings
-  character(15), dimension(MaxBuild) :: BuildName ! Array of building names
+  integer :: Nloc                               ! Number of locations
+  character(15), dimension(Maxloc) :: locName ! Array of location names
 
 
 end module
 
-! Edificio info module
+! location info module
 
-module MODedificio
+module MODlocation
 
-  USE MODparam, ONLY: MaxBuild
+  USE MODparam, ONLY: Maxloc
 
-  integer, dimension(MaxBuild) :: Nelem
+  integer, dimension(Maxloc) :: Nelem
 
 end module
 
