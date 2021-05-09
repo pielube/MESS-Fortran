@@ -13,7 +13,7 @@ module MODcoord
   integer :: itime        ! Which timestep are we in index
   integer :: itimeperweek ! Which timestep are we in in a week index
   integer :: itimeperday  ! Which timestep are we in in a day index
-  integer :: ibuild       ! Which building are we in in index
+  integer :: iloc       ! Which location are we in in index
 
 endmodule MODcoord
 
@@ -36,8 +36,8 @@ module MODParam
   ! Max number of elements per different elements type
 
   integer, parameter:: MaxTypDem =   25,                & ! Massimo Num di tipologie di domanda
-                       MaxBuild  =  100,                & ! Massimo Num di edifici
-                       MaxComp   =   10,                & ! Massimo Num di componenti per ogni edificio
+                       Maxloc  =  100,                & ! Massimo Num di edifici
+                       MaxComp   =   10,                & ! Massimo Num di componenti per ogni location
                        MaxAddPar =    6                   ! Max number of additional hourly parameters to be stored for each tech
   integer, parameter:: MaxGiorni = NdayYear*Nyears + 60 
   integer, parameter:: MaxHours  = NhourYear*Nyears+ 60
@@ -83,14 +83,14 @@ endmodule MODParam
 
 module MODbattery
 
-  USE MODParam, ONLY: NhourWeek,NhourYear,Nyears,MaxBuild
+  USE MODParam, ONLY: NhourWeek,NhourYear,Nyears,Maxloc
 
   integer :: iswitch
 
-  real(8), dimension(MaxBuild) :: ccyc,ccal,csum,SoHBattery
+  real(8), dimension(Maxloc) :: ccyc,ccal,csum,SoHBattery
   real(8)                       :: tref_cal,ccal2,totalccal,totalccyc
 
-  real(8), dimension(NhourWeek,MaxBuild) :: WeeklyChargeHist
+  real(8), dimension(NhourWeek,Maxloc) :: WeeklyChargeHist
   real(8), dimension(Nhouryear*Nyears)   :: SOHtemp
   real(8), dimension(1565)               :: SOHtempbis
 
@@ -100,31 +100,31 @@ module MODbattery
 endmodule MODbattery
 
 
-! Boiler related module >>> WIP: only one boiler per building is allowed
+! Boiler related module >>> WIP: only one boiler per location is allowed
 
 module MODboiler
 
-  USE MODParam, ONLY: MaxBuild
+  USE MODParam, ONLY: Maxloc
 
-  real(8), dimension(MaxBuild) :: BoilerPeak
+  real(8), dimension(Maxloc) :: BoilerPeak
 
 endmodule MODboiler
 
 module MODelectrolyzer
 
-  USE MODParam, ONLY: MaxBuild      
+  USE MODParam, ONLY: Maxloc      
 
-  integer, dimension(MaxBuild) :: iswitchelectrolyzer
-  real(8), dimension(Maxbuild) :: coeffAel,coeffBel
+  integer, dimension(Maxloc) :: iswitchelectrolyzer
+  real(8), dimension(Maxloc) :: coeffAel,coeffBel
 
 endmodule MODelectrolyzer
 
 module MODfuelcell
 
-  USE MODParam, ONLY: MaxBuild      
+  USE MODParam, ONLY: Maxloc      
 
-  integer, dimension(MaxBuild) :: iswitchfuelcell
-  real(8), dimension(Maxbuild) :: coeffAfc,coeffBfc
+  integer, dimension(Maxloc) :: iswitchfuelcell
+  real(8), dimension(Maxloc) :: coeffAfc,coeffBfc
 
 endmodule MODfuelcell
 
@@ -133,20 +133,20 @@ endmodule MODfuelcell
 
 module MODAddHourlyData
 
-  USE MODParam, ONLY: MaxBuild,MaxComp,MaxAddPar,NhourYear
+  USE MODParam, ONLY: Maxloc,MaxComp,MaxAddPar,NhourYear
 
-  real(8), dimension(MaxBuild,  & ! For each building
-                     MaxComp,   & ! For each component (technology) of the building
+  real(8), dimension(Maxloc,  & ! For each location
+                     MaxComp,   & ! For each component (technology) of the location
                      MaxAddPar, & ! For each additional parameter
                      NhourYear) & ! For each hour of the reference year !<<< WIP: to be changed if the simulation will go on for more than 1y (e.g. ageing)
                      :: AddHourlyData                            !         if ageing, if there are no diff in en balances btw 30y, remember to save just 1y         
 
 endmodule MODAddHourlyData
 
-module MODcitydescription
+module MODwhichtechs
 
-  USE MODParam, ONLY: MaxBuild,MaxComp
+  USE MODParam, ONLY: Maxloc,MaxComp
 
-  character(len=2), dimension(MaxBuild,MaxComp) :: citytechs
+  character(len=2), dimension(Maxloc,MaxComp) :: whichtechs
 
-endmodule MODcitydescription
+endmodule MODwhichtechs

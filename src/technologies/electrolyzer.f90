@@ -21,7 +21,7 @@ subroutine Electrolyzer(DeltaEnergy,        & ! (I)  electrical energy balance  
                         HydroMol,           & ! (O)  Produced moles of hydrogen     [mol] ! necessary for compressor
                         etaFaraday)           ! (O)  Faraday efficiency             [-]   ! necessary for compressor     
 
-      USE MODcoord, ONLY: itime,ibuild                       
+      USE MODcoord, ONLY: itime,iloc                       
       USE MODParam, ONLY: timestep,FaradayConst,Runiv,eNepero,LHVh2,Pstandard,Tstandard,h2oMolMass,rhoStdh2o,rhoStdh2,h2MolMass 
       USE MODelectrolyzer, ONLY: iswitchelectrolyzer,coeffAel,coeffBel                                   
                                 
@@ -50,7 +50,7 @@ subroutine Electrolyzer(DeltaEnergy,        & ! (I)  electrical energy balance  
       ! Linear regression to approx V-I curve of the electrolyzer
       ! NB could be called only once if storing coefficients
 
-      if(iswitchelectrolyzer(ibuild).eq.0)then
+      if(iswitchelectrolyzer(iloc).eq.0)then
                   
         call Coefficients(CellNumber,         & ! (I) n° of electr. cells           [-]
                           CurrDensityMin,     & ! (I) Minimum current density       [A/cm^2]
@@ -64,10 +64,10 @@ subroutine Electrolyzer(DeltaEnergy,        & ! (I)  electrical energy balance  
                           CathodeCurrDensity, & ! (I) [A/cm^2]
                           CTCanode,           & ! (I) Anode Charge Transfer coefficient   [-] 
                           CTCcathode,         & ! (I) Cathode Charge Transfer coefficient [-] 
-                          coeffAel(ibuild),            & ! (O) grade 0 coeff  [-]
-                          coeffBel(ibuild))              ! (O) grade 1 coeff  [-]
+                          coeffAel(iloc),            & ! (O) grade 0 coeff  [-]
+                          coeffBel(iloc))              ! (O) grade 1 coeff  [-]
 
-        iswitchelectrolyzer(ibuild) = 1
+        iswitchelectrolyzer(iloc) = 1
 
       else
       endif
@@ -88,9 +88,9 @@ subroutine Electrolyzer(DeltaEnergy,        & ! (I)  electrical energy balance  
                         
       ! Finding the working point of the electrolyzer by explicitly solving the system:
       ! PowerInput=CellCurrDensity*CellActiveArea*Vstack
-      ! Vstack=coeffBel(ibuild)*CellCurrDensity+coeffAel(ibuild)
+      ! Vstack=coeffBel(iloc)*CellCurrDensity+coeffAel(iloc)
 
-      CellCurrDensity = (-coeffAel(ibuild)+SQRT(coeffAel(ibuild)**2.d0+4.d0*coeffBel(ibuild)*(PowerInput*1000.d0/CellActiveArea)))/(2.d0*coeffBel(ibuild))  ! [A/cm^2]
+      CellCurrDensity = (-coeffAel(iloc)+SQRT(coeffAel(iloc)**2.d0+4.d0*coeffBel(iloc)*(PowerInput*1000.d0/CellActiveArea)))/(2.d0*coeffBel(iloc))  ! [A/cm^2]
 
       ! Checking if resulting current density is high enough for the electrolyzer to start, otherwise hydrogen prod = 0
       if(CellCurrDensity .lt. CurrDensityMin)then
@@ -105,7 +105,7 @@ subroutine Electrolyzer(DeltaEnergy,        & ! (I)  electrical energy balance  
       else
       endif   
 
-      Vstack=coeffBel(ibuild)*CellCurrDensity+coeffAel(ibuild)
+      Vstack=coeffBel(iloc)*CellCurrDensity+coeffAel(iloc)
       Current = CellCurrDensity*CellActiveArea  ![A]      
       
       ! Computing electrolyzer's efficiency and  hydrogen energy output    

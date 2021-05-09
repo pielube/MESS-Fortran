@@ -128,7 +128,7 @@ subroutine newSrain(Fi,         & ! (I) Numero del file,          per ora = 1 da
 
 
       ! >>> WIP: use this to derive ConvData from test input <<<
-      !! Building ConvData
+      !! location ConvData
       !call readtest(ConvData)
       ! >>> WIP: use this to derive ConvData from test input <<<
 

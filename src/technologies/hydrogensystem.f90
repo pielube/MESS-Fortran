@@ -181,7 +181,7 @@ subroutine HydrogenSystem(DeltaEnergy,           & ! (IO)  Electrical energy bal
         ! Checking if I am trying to store more hydrogen then what I can store
           if(Charge .gt. ChargeMax)then
             DeltaHydrogen = DeltaHydrogen-(Charge-ChargeMax) ![kWh] hydrogen actually stored 
-            DeltaElectricalEnergy = - DeltaHydrogen/EtaElectr  ![kWh] electricity actually consumed < 0 cause I am storing energy (sink for the building)
+            DeltaElectricalEnergy = - DeltaHydrogen/EtaElectr  ![kWh] electricity actually consumed < 0 cause I am storing energy (sink for the location)
             DeltaEnergy = (Charge-ChargeMax)/EtaElectr + DeltaElEnergy ! [kWh] energy balance
             Charge      = ChargeMax       
           else
@@ -226,7 +226,7 @@ subroutine HydrogenSystem(DeltaEnergy,           & ! (IO)  Electrical energy bal
         ! Checking if I am trying to take more hydrogen then how much is left
           if(Charge .lt. ChargeMin)then 
             deltaHydrogen = deltaHydrogen+(ChargeMin-Charge) ![kWh] hydrogen actually used by the fuel cell 
-            DeltaElectricalEnergy = -deltaHydrogen*etaFC     ![kWh] electricity actually produced > 0 cause I am releasing energy (source for the building)
+            DeltaElectricalEnergy = -deltaHydrogen*etaFC     ![kWh] electricity actually produced > 0 cause I am releasing energy (source for the location)
             DeltaEnergy = (Charge-ChargeMin)*etaFC - DeltaE  ![kWh] updated energy balance
             Charge      = ChargeMin             
           else 

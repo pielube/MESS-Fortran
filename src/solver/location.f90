@@ -1,14 +1,14 @@
 
-! Building subroutine
+! location subroutine
 ! Lubello, Carcasci: dic 2019
 
 
-subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
+subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
                     AirDens,         & !(I) Air density         [kg/m3]
                     SolIrr,          & !(I) Solar irradiance    [W/m2]
                     WindSpeed,       & !(I) Wind speed          [m/s]
                     RelHumdity,      & !(I) Relative humidity   [-]
-                    BuildName,       & !(I) Building name
+                    locName,       & !(I) location name
                                      
                     deltaEEelectr,   & !(O) Electrical energy balance  [kWh]
                     sourceEEelectr,  & !(O) Electrical energy produced [kWh]
@@ -35,19 +35,19 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
 
                     DataEconAn,      & !(O) Data necessary for economic analysis
 
-                    NValData,        & !(IO) Number of components in the building
+                    NValData,        & !(IO) Number of components in the location
                     ValData)           !(IO) 2-D array of columns->components rows->technology-specific parameters
 
 
-      USE MODcoord,           ONLY: icase,iyear,itime,ibuild
+      USE MODcoord,           ONLY: icase,iyear,itime,iloc
       USE MODGlobalParam,     ONLY: IndAgeing
       USE MODparam,           ONLY: NhourYear,MaxComp
       USE MODprices,          ONLY: elenPriceBuy,elenPriceSell,gasPriceHouseS ! >>> WIP: nel module ho prezzi diversi del gas a seconda della taglia dell'utenza, da recuperare
       USE MODbattery,         ONLY: SoHBattery,ccyc,ccal,csum,tref_cal,ccal2, & ! >>> WIP: questo dovrà finire nel modulo battery
                                     TempArrBattDeg
       USE MODAddHourlyData,   ONLY: AddHourlyData
-      USE MODedificio,        ONLY: Nelem
-      USE MODcitydescription, ONLY: citytechs
+      USE MODlocation,        ONLY: Nelem
+      USE MODwhichtechs, ONLY: whichtechs
 
 
       implicit real(8) (a-h,o-z), integer(i-n)
@@ -56,7 +56,7 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
       ! Argument declarations
 
       real(8),                               intent(IN   ) :: TempAmb,AirDens,SolIrr,WindSpeed
-      character(15),                         intent(IN   ) :: BuildName
+      character(15),                         intent(IN   ) :: locName
 
       real(8),                               intent(  OUT) :: deltaEEelectr,sourceEEelectr,sinkEEelectr
       real(8),                               intent(  OUT) :: deltaEEheatAmb,sourceEEheatAmb,sinkEEheatAmb
@@ -76,7 +76,7 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
       ! Local declarations
 
       integer,       dimension(    MaxComp)                :: IndCase
-      character(15)                                        :: BuildNameTemp
+      character(15)                                        :: locNameTemp
       character(20)                                        :: StringAux
 
 
@@ -123,23 +123,23 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
 
 
 
-      ! Reading of which elements is composed the edificio and their input data
+      ! Reading of which elements is composed the location and their input data
       ! ------------------------------------------------------------------------
 
-      call estens(BuildName,BuildNameTemp,'dat')
+      call estens(locName,locNameTemp,'dat')
 
       if(itime.eq.1) then ! Reading only at first iteration (values stored in NValData,ValData)
 
-        open(2,file=BuildNameTemp,status='old',err=7000)
+        open(2,file=locNameTemp,status='old',err=7000)
         iline=0
         rewind 2
 
-        read(2,*,err=7010) Nelem(ibuild)   ! Number of elements composing the unit
+        read(2,*,err=7010) Nelem(iloc)   ! Number of elements composing the unit
         iline=iline+1
 
         ! Searching elements composing the unit, through their string
 
-        do 500 ii=1,Nelem(ibuild)
+        do 500 ii=1,Nelem(iloc)
           iline=iline+1
           read(2,*,err=7010) StringAux   ! Name of the element
 
@@ -150,7 +150,7 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
             DataEconAn(1,ii) = 01 !ID
             IndCase   (  ii) =  0 ! 0 = sara' simulato anche se icase =0
             Ndat=3  ! Number of inputs
-            citytechs(ibuild,ii) = '01'
+            whichtechs(iloc,ii) = '01'
 
           elseif(StringAux(1:8).eq.'[DemQth]')  then
             ! String found: thermal demand
@@ -159,7 +159,7 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
             DataEconAn(1,ii) = 02 !ID
             IndCase   (  ii) =  0 ! 0 = sara' simulato anche se icase =0
             Ndat=6  ! Number of inputs
-            citytechs(ibuild,ii) = '02'
+            whichtechs(iloc,ii) = '02'
 
 
           elseif(StringAux(1:11).eq.'[SolPhoto]') then
@@ -169,7 +169,7 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
             DataEconAn(1,ii) = 03 !ID
             IndCase   (  ii) =  1 ! 1 = NON sara' simulato se icase =0
             Ndat=4
-            citytechs(ibuild,ii) = '03'
+            whichtechs(iloc,ii) = '03'
 
 
           elseif(StringAux(1:11).eq.'[WindTurb]') then
@@ -179,7 +179,7 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
             DataEconAn(1,ii) = 04 !ID
             IndCase   (  ii) =  1 !1 = NON sara' simulato se icase =0
             Ndat=7 ! Number of inputs
-            citytechs(ibuild,ii) = '04'
+            whichtechs(iloc,ii) = '04'
 
 
           elseif(StringAux(1:9).eq.'[SolColl]')  then
@@ -189,7 +189,7 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
             DataEconAn(1,ii) = 05 !ID
             IndCase   (  ii) =  1 ! 1 = NON sara' simulato se icase =0
             Ndat=7 ! Number of inputs
-            citytechs(ibuild,ii) = '05'
+            whichtechs(iloc,ii) = '05'
 
 
           elseif(StringAux(1:9).eq.'[AirCond]')   then
@@ -199,7 +199,7 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
             DataEconAn(1,ii) = 06 !ID
             IndCase   (  ii) =  0 ! 0 = sara' simulato se icase =0
             Ndat=3 ! Number of inputs
-            citytechs(ibuild,ii) = '06'
+            whichtechs(iloc,ii) = '06'
 
 
           elseif(StringAux(1:10).eq.'[HeatPump]')   then
@@ -209,7 +209,7 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
             DataEconAn(1,ii) = 07 !ID
             IndCase   (  ii) =  1 ! 1 = NON sara' simulato se icase =0
             Ndat=3 ! Number of inputs
-            citytechs(ibuild,ii) = '07'
+            whichtechs(iloc,ii) = '07'
 
 
           elseif(StringAux(1:8).eq.'[HVACel]')   then
@@ -219,7 +219,7 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
             DataEconAn(1,ii) = 08 !ID
             IndCase   (  ii) =  1 ! 1 = NON sara' simulato se icase =0
             Ndat=10 ! Number of inputs
-            citytechs(ibuild,ii) = '08'
+            whichtechs(iloc,ii) = '08'
 
 
           elseif(StringAux(1:9).eq.'[HVACgas]')   then
@@ -229,7 +229,7 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
             DataEconAn(1,ii) = 09 !ID
             IndCase   (  ii) =  1 ! 1 = NON sara' simulato se icase =0
             Ndat=12 ! Number of inputs
-            citytechs(ibuild,ii) = '09'
+            whichtechs(iloc,ii) = '09'
 
 
           elseif(StringAux(1:11).eq.'[ElChiller]')   then
@@ -239,7 +239,7 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
             DataEconAn(1,ii) = 10 !ID
             IndCase   (  ii) =  1 ! 0 = sara' simulato anche se icase =0
             Ndat=6 ! Number of inputs
-            citytechs(ibuild,ii) = '10'
+            whichtechs(iloc,ii) = '10'
 
 
           elseif(StringAux(1:11).eq.'[SimpBatt]') then
@@ -249,7 +249,7 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
             DataEconAn(1,ii) = 11 !ID
             IndCase   (  ii) =  1 ! 1 = NON sara' simulato se icase =0
             Ndat=7 ! Number of inputs
-            citytechs(ibuild,ii) = '11'
+            whichtechs(iloc,ii) = '11'
 
 
           elseif(StringAux(1:16).eq.'[HydrogenSystem]') then
@@ -259,7 +259,7 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
             DataEconAn(1,ii) = 12 !ID
             IndCase   (  ii) =  1 ! 1 = NON sara' simulato se icase =0
             Ndat=20 ! Number of inputs
-            citytechs(ibuild,ii) = '12'
+            whichtechs(iloc,ii) = '12'
 
 
           elseif(StringAux(1:6).eq.'[CCHP]')   then
@@ -269,7 +269,7 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
             DataEconAn(1,ii) = 13 !ID
             IndCase   (  ii) =  1 ! 0 = sara' simulato anche se icase =0
             Ndat=13 ! Number of inputs
-            citytechs(ibuild,ii) = '13'
+            whichtechs(iloc,ii) = '13'
 
 
           elseif(StringAux(1:8).eq.'[Boiler]')   then
@@ -279,7 +279,7 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
             DataEconAn(1,ii) = 14 !ID
             IndCase   (  ii) =  0 ! 0 = sara' simulato anche se icase =0
             Ndat=2 ! Number of inputs
-            citytechs(ibuild,ii) = '14'
+            whichtechs(iloc,ii) = '14'
 
 
           else
@@ -300,18 +300,18 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
 
         close(2)
 
-        NValData=Nelem(ibuild) ! Number of components
+        NValData=Nelem(iloc) ! Number of components
 
       endif
 
 
-      ! Solving the edificio
+      ! Solving the location
       ! ====================
 
-      Nelem(ibuild)=NValData ! Number of components
+      Nelem(iloc)=NValData ! Number of components
 
       ! Searching elements composing the unit
-      do 1000 ii=1,Nelem(ibuild)
+      do 1000 ii=1,Nelem(iloc)
 
         if(indCase(ii).gt.icase) then
           !* non viene simulato
@@ -321,7 +321,7 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
         endif
 
 
-        ID=ValData(1,ii) !ID component of edificio
+        ID=ValData(1,ii) !ID component of location
 
         select case(ID)
         case(01) ! [DemWel]
@@ -338,7 +338,7 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
           sinkEEelectr   = sinkEEelectr   + WWel1
           deltaEEelectr = sourceEEelectr - sinkEEelectr
 
-          AddHourlyData(ibuild,ii,1,itime) = WWel1
+          AddHourlyData(iloc,ii,1,itime) = WWel1
 
           DataEconAn(2,ii) = 0.d0
           DataEconAn(3,ii) = 0.d0
@@ -366,9 +366,9 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
           deltaEEheatWat     = sourceEEheatWat     - sinkEEheatWat
           deltaEEcoolAmb     = sourceEEcoolAmb     - sinkEEcoolAmb
 
-          AddHourlyData(ibuild,ii,1,itime) = QQAmbHeat
-          AddHourlyData(ibuild,ii,2,itime) = QQWatHeat
-          AddHourlyData(ibuild,ii,3,itime) = QQAmbCool
+          AddHourlyData(iloc,ii,1,itime) = QQAmbHeat
+          AddHourlyData(iloc,ii,2,itime) = QQWatHeat
+          AddHourlyData(iloc,ii,3,itime) = QQAmbCool
 
           DataEconAn(2,ii) = 0.d0
           DataEconAn(3,ii) = 0.d0 
@@ -392,7 +392,7 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
           sourceEEelectr = sourceEEelectr + WWelPhoto
           deltaEEelectr = sourceEEelectr - sinkEEelectr
 
-          AddHourlyData(ibuild,ii,1,itime) = WWelPhoto
+          AddHourlyData(iloc,ii,1,itime) = WWelPhoto
 
           DataEconAn(2,ii) = 1.d0
           DataEconAn(3,ii) = CapexSolPhoto
@@ -424,7 +424,7 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
           sourceEEelectr = sourceEEelectr + WWelWind
           deltaEEelectr = sourceEEelectr - sinkEEelectr
 
-          AddHourlyData(ibuild,ii,1,itime) = WWelWind
+          AddHourlyData(iloc,ii,1,itime) = WWelWind
 
           DataEconAn(2,ii) = 1.d0
           DataEconAn(3,ii) = CapexWindTurb
@@ -463,10 +463,10 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
           sourceEEheatWat     = sourceEEheatWat     + QQSolColl
           deltaEEheatWat     = sourceEEheatWat     - sinkEEheatWat
 
-          AddHourlyData(ibuild,ii,1,itime) = SoCTank
-          AddHourlyData(ibuild,ii,2,itime) = QQprodSolColl
-          AddHourlyData(ibuild,ii,3,itime) = QQSolColl
-          AddHourlyData(ibuild,ii,4,itime) = QQdiscSolColl
+          AddHourlyData(iloc,ii,1,itime) = SoCTank
+          AddHourlyData(iloc,ii,2,itime) = QQprodSolColl
+          AddHourlyData(iloc,ii,3,itime) = QQSolColl
+          AddHourlyData(iloc,ii,4,itime) = QQdiscSolColl
 
           DataEconAn(2,ii) = 1.d0
           DataEconAn(3,ii) = CapexSolColl
@@ -497,8 +497,8 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
           sourceEEcoolAmb     = sourceEEcoolAmb + QQcoolOutAirCond
           deltaEEcoolAmb   = sourceEEcoolAmb - sinkEEcoolAmb
 
-          AddHourlyData(ibuild,ii,1,itime) = QQcoolOutAirCond
-          AddHourlyData(ibuild,ii,2,itime) = ElEnConsAC
+          AddHourlyData(iloc,ii,1,itime) = QQcoolOutAirCond
+          AddHourlyData(iloc,ii,2,itime) = ElEnConsAC
 
           DataEconAn(2,ii) = 1.d0
           DataEconAn(3,ii) = CapexAirCond
@@ -529,8 +529,8 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
           sourceEEheatAmb    = sourceEEheatAmb + QQheatOutHeatPump
           deltaEEheatAmb  = sourceEEheatAmb - sinkEEheatAmb
 
-          AddHourlyData(ibuild,ii,1,itime) = QQheatOutHeatPump
-          AddHourlyData(ibuild,ii,2,itime) = ElEnConsHP
+          AddHourlyData(iloc,ii,1,itime) = QQheatOutHeatPump
+          AddHourlyData(iloc,ii,2,itime) = ElEnConsHP
 
           DataEconAn(2,ii) = 1.d0
           DataEconAn(3,ii) = CapexHeatPump
@@ -583,9 +583,9 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
           sourceEEcoolAmb = sourceEEcoolAmb + CoolProdHVACel
           deltaEEcoolAmb  = sourceEEcoolAmb - sinkEEcoolAmb
 
-          AddHourlyData(ibuild,ii,1,itime) = ThProdHVACel  
-          AddHourlyData(ibuild,ii,2,itime) = CoolProdHVACel
-          AddHourlyData(ibuild,ii,3,itime) = ElConsHVACel 
+          AddHourlyData(iloc,ii,1,itime) = ThProdHVACel  
+          AddHourlyData(iloc,ii,2,itime) = CoolProdHVACel
+          AddHourlyData(iloc,ii,3,itime) = ElConsHVACel 
 
           DataEconAn(2,ii) = 1.d0
           DataEconAn(3,ii) = CapexHVACel
@@ -648,11 +648,11 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
           ! gas
           GasConsump = GasConsump + GasConsHVACgas
 
-          AddHourlyData(ibuild,ii,1,itime) = ThProdHVACgas
-          AddHourlyData(ibuild,ii,2,itime) = CoolProdHVACgas
-          AddHourlyData(ibuild,ii,3,itime) = GasConsHVACgas
-          AddHourlyData(ibuild,ii,4,itime) = ElConsHVACgas
-          AddHourlyData(ibuild,ii,5,itime) = Rec_Heat
+          AddHourlyData(iloc,ii,1,itime) = ThProdHVACgas
+          AddHourlyData(iloc,ii,2,itime) = CoolProdHVACgas
+          AddHourlyData(iloc,ii,3,itime) = GasConsHVACgas
+          AddHourlyData(iloc,ii,4,itime) = ElConsHVACgas
+          AddHourlyData(iloc,ii,5,itime) = Rec_Heat
 
           DataEconAn(2,ii) = 1.d0
           DataEconAn(3,ii) = CapexHVACgas
@@ -694,10 +694,10 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
           sourceEEcoolAmb = sourceEEcoolAmb + CoolProdElChiller
           deltaEEcoolAmb  = sourceEEcoolAmb - sinkEEcoolAmb
 
-          AddHourlyData(ibuild,ii,1,itime) = CoolProdElChiller
-          AddHourlyData(ibuild,ii,2,itime) = ElConsElChiller
-          AddHourlyData(ibuild,ii,3,itime) = ElConsFanElChiller
-          AddHourlyData(ibuild,ii,4,itime) = COPElChiller
+          AddHourlyData(iloc,ii,1,itime) = CoolProdElChiller
+          AddHourlyData(iloc,ii,2,itime) = ElConsElChiller
+          AddHourlyData(iloc,ii,3,itime) = ElConsFanElChiller
+          AddHourlyData(iloc,ii,4,itime) = COPElChiller
 
           DataEconAn(2,ii) = 1.d0
           DataEconAn(3,ii) = CapexElChiller
@@ -714,9 +714,9 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
           if(itime.eq.1 .and. iyear.eq.1) then   ! >>> WIP: What if IndAgeing = 0? Verify it to be always = 1 <<<
             SoHBattery   =    ValData(7,ii)
             ccal2 = 0.d0
-            ccal(ibuild) = 0.d0
-            ccyc(ibuild) = 0.d0
-            csum(ibuild) = 0.d0
+            ccal(iloc) = 0.d0
+            ccyc(iloc) = 0.d0
+            csum(iloc) = 0.d0
             tref_cal     = 0.d0
           else
           endif
@@ -740,8 +740,8 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
           !electricity
           deltaEEelectr = deltaBatt
 
-          AddHourlyData(ibuild,ii,1,itime) = SoCBattery
-          AddHourlyData(ibuild,ii,2,itime) = deltaBattery
+          AddHourlyData(iloc,ii,1,itime) = SoCBattery
+          AddHourlyData(iloc,ii,2,itime) = deltaBattery
  
           DataEconAn(3,ii) = CapexSimpBatt 
         
@@ -762,7 +762,7 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
               DataEconAn(4,ii) = 30.d0
             else
               ! updating DataEconAn every time SoH < 0.70
-              if(SoHBattery(ibuild) .le. 0.70d0)then
+              if(SoHBattery(iloc) .le. 0.70d0)then
                 Nsost = DataEconAn(2,ii)
                 Nsost = Nsost + 1
                 DataEconAn(2,ii) = Nsost
@@ -770,9 +770,9 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
                 tref_cal = dble(itime+((iyear-1)*NhourYear))/dble(NhourYear)
                 write(*,*) 'sost',tref_cal
                 ccal2 = 0.d0
-                ccal(ibuild)=0.d0
-                ccyc(ibuild)=0.d0
-                SoHBattery(ibuild) = 1.d0
+                ccal(iloc)=0.d0
+                ccyc(iloc)=0.d0
+                SoHBattery(iloc) = 1.d0
               endif
             endif
 
@@ -857,16 +857,16 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
           ! electrical
           deltaEEelectr = DeltaEnergy
 
-          AddHourlyData(ibuild,ii,1,itime) = SoCHydrogen
-          AddHourlyData(ibuild,ii,2,itime) = deltaHydrogenVolume 
-          AddHourlyData(ibuild,ii,3,itime) = DeltaElectricalEnergy 
-          AddHourlyData(ibuild,ii,4,itime) = FC_Heat
+          AddHourlyData(iloc,ii,1,itime) = SoCHydrogen
+          AddHourlyData(iloc,ii,2,itime) = deltaHydrogenVolume 
+          AddHourlyData(iloc,ii,3,itime) = DeltaElectricalEnergy 
+          AddHourlyData(iloc,ii,4,itime) = FC_Heat
           if(DeltaElectricalEnergy.lt.0.d0)then
-            AddHourlyData(ibuild,ii,5,itime) = etaElectr
+            AddHourlyData(iloc,ii,5,itime) = etaElectr
           elseif(DeltaElectricalEnergy.gt.0.d0)then
-            AddHourlyData(ibuild,ii,5,itime) = etaFC
+            AddHourlyData(iloc,ii,5,itime) = etaFC
           else
-            AddHourlyData(ibuild,ii,5,itime) = 0.d0
+            AddHourlyData(iloc,ii,5,itime) = 0.d0
           endif
 
           DataEconAn(2,ii) = 1.d0
@@ -936,12 +936,12 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
           ! gas
           GasConsump = GasConsump + Gas_Cons_real
 
-          AddHourlyData(ibuild,ii,1,itime) = El_Production
-          AddHourlyData(ibuild,ii,2,itime) = Heat_Production 
-          AddHourlyData(ibuild,ii,3,itime) = Frigo_Production
-          AddHourlyData(ibuild,ii,4,itime) = Gas_Cons_real
-          AddHourlyData(ibuild,ii,5,itime) = El_Cons_fan
-          AddHourlyData(ibuild,ii,6,itime) = HeatConsChiller
+          AddHourlyData(iloc,ii,1,itime) = El_Production
+          AddHourlyData(iloc,ii,2,itime) = Heat_Production 
+          AddHourlyData(iloc,ii,3,itime) = Frigo_Production
+          AddHourlyData(iloc,ii,4,itime) = Gas_Cons_real
+          AddHourlyData(iloc,ii,5,itime) = El_Cons_fan
+          AddHourlyData(iloc,ii,6,itime) = HeatConsChiller
 
           DataEconAn(2,ii) = 1.d0
           DataEconAn(3,ii) = Capex_Cogeneration + Capex_Abs_Chiller
@@ -968,8 +968,8 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
           DataEconAn(3,ii) = CapexBoiler
           DataEconAn(4,ii) = 20.d0
 
-          AddHourlyData(ibuild,ii,1,itime) = QQfuelHour
-          AddHourlyData(ibuild,ii,2,itime) = GasConsumpBoil
+          AddHourlyData(iloc,ii,1,itime) = QQfuelHour
+          AddHourlyData(iloc,ii,2,itime) = GasConsumpBoil
 
 
         case default
@@ -978,7 +978,7 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
           stop 'Index error!'
         end select
 
-1000  continue ! end do cycle with ii on Nelem(ibuild)
+1000  continue ! end do cycle with ii on Nelem(iloc)
 
 
 
@@ -1008,17 +1008,17 @@ subroutine edificio(TempAmb,         & !(I) Ambient temperature [°C]
       return
 
 7000  continue
-      write(*,7100) BuildName//'.dat'
-      write(8,7100) BuildName//'.dat'
+      write(*,7100) locName//'.dat'
+      write(8,7100) locName//'.dat'
 7100  format(/,'ERROR: Open error on "',a,'" file')
       stop 'Error!'
 
 
 7010  continue
-      write(*,7110) BuildName//'.dat'
-      write(8,7110) BuildName//'.dat'
+      write(*,7110) locName//'.dat'
+      write(8,7110) locName//'.dat'
 7110  format(/,'ERROR: Read error on "',a,'" file')
       stop 'Error!'
 
 
-end subroutine edificio
+end subroutine location

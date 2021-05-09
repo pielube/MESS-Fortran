@@ -10,7 +10,7 @@ subroutine Boiler(QQdem,       & ! (I) Heat demand       [kWh]
                   GasConsump,  & ! (O) Fuel consumption  [Sm3]
                   CapexBoiler)   ! (O) Boiler capex      [eur]
 
-      USE MODcoord,  ONLY: ibuild
+      USE MODcoord,  ONLY: iloc
       USE MODParam,  ONLY: timestep, NsecHour,LHVch4,rhoStdch4
       USE MODboiler, ONLY: BoilerPeak
 
@@ -20,7 +20,7 @@ subroutine Boiler(QQdem,       & ! (I) Heat demand       [kWh]
       real(8), intent(  OUT) :: QQconsump,GasConsump,CapexBoiler
 
 
-      BoilerPeak(ibuild) = max(BoilerPeak(ibuild),-QQdem/timestep) ! Updating peak power requested to the boiler
+      BoilerPeak(iloc) = max(BoilerPeak(iloc),-QQdem/timestep) ! Updating peak power requested to the boiler
 
       if(QQdem .ge. 0.d0)then
         QQconsump  = 0.d0 ! [kWh]
@@ -31,7 +31,7 @@ subroutine Boiler(QQdem,       & ! (I) Heat demand       [kWh]
       endif
 
       ! Capex
-      CapexBoiler = BoilerPeak(ibuild)*1.1d0*CostBoiler
+      CapexBoiler = BoilerPeak(iloc)*1.1d0*CostBoiler
 
       return
 

@@ -3,16 +3,15 @@
 ! Main program MESS - Multi Energy System Simulator (2021 version)
 ! ================================================================
 ! Pietro Lubello, Carlo Carcasci
-! TESTSTSTSTSTTS
 
 program MultiEnSyst
 
       USE MODbatterytest
-      USE MODcitydescription, ONLY: citytechs
+      USE MODwhichtechs, ONLY: whichtechs
 
 
       USE MODcoord, ONLY: icase
-      USE MODparam, ONLY: NdayYear,NhourYear,MaxBuild,Nyears,Nstep,MaxGiorni,MaxAddPar
+      USE MODparam, ONLY: NdayYear,NhourYear,Maxloc,Nyears,Nstep,MaxGiorni,MaxAddPar
       USE MODglobalparam, ONLY: RefYear
 
 
@@ -23,8 +22,8 @@ program MultiEnSyst
       USE MODfuelcell,     ONLY: iswitchfuelcell
 
 
-      USE MODcity,     ONLY: Nbuild
-      USE MODedificio, ONLY: Nelem
+      USE MODAggr,     ONLY: Nloc
+      USE MODlocation, ONLY: Nelem
 
       implicit real(8) (a-h,o-z), integer(i-n)
 
@@ -32,28 +31,28 @@ program MultiEnSyst
       real(8), dimension(0:MaxGiorni):: curveNPV0, curveNPV, deltaNPV
       real(8)                        :: ActPBP,ProfInd
 
-      real(8), dimension(NhourYear)  :: GasConsumpCity , &
-                                        GasConsumpCity0
+      real(8), dimension(NhourYear)  :: GasConsumpAggr , &
+                                        GasConsumpAggr0
 
-      real(8), dimension(NhourYear)  :: EnBoughtOutCity ,EnSoldOutCity , &
-                                        EnBoughtOutCity0,EnSoldOutCity0
+      real(8), dimension(NhourYear)  :: EnBoughtOutAggr ,EnSoldOutAggr , &
+                                        EnBoughtOutAggr0,EnSoldOutAggr0
 
       type(Battery) :: batteria1
 
-      real(8), dimension(MaxBuild,NhourYear) :: deltaEEelectr,sourceEEelectr,sinkEEelectr
-      real(8), dimension(MaxBuild,NhourYear) :: deltaEEheatAmb,sourceEEheatAmb,sinkEEheatAmb
-      real(8), dimension(MaxBuild,NhourYear) :: deltaEEheatWat,sourceEEheatWat,sinkEEheatWat
-      real(8), dimension(MaxBuild,NhourYear) :: deltaEEcoolAmb,sourceEEcoolAmb,sinkEEcoolAmb
+      real(8), dimension(Maxloc,NhourYear) :: deltaEEelectr,sourceEEelectr,sinkEEelectr
+      real(8), dimension(Maxloc,NhourYear) :: deltaEEheatAmb,sourceEEheatAmb,sinkEEheatAmb
+      real(8), dimension(Maxloc,NhourYear) :: deltaEEheatWat,sourceEEheatWat,sinkEEheatWat
+      real(8), dimension(Maxloc,NhourYear) :: deltaEEcoolAmb,sourceEEcoolAmb,sinkEEcoolAmb
 
-      real(8), dimension(NhourYear) :: deltaEEelectrCity,sourceEEelectrCity,sinkEEelectrCity
-      real(8), dimension(NhourYear) :: deltaEEheatAmbCity,sourceEEheatAmbCity,sinkEEheatAmbCity
-      real(8), dimension(NhourYear) :: deltaEEheatWatCity,sourceEEheatWatCity,sinkEEheatWatCity
-      real(8), dimension(NhourYear) :: deltaEEcoolAmbCity,sourceEEcoolAmbCity,sinkEEcoolAmbCity
+      real(8), dimension(NhourYear) :: deltaEEelectrAggr,sourceEEelectrAggr,sinkEEelectrAggr
+      real(8), dimension(NhourYear) :: deltaEEheatAmbAggr,sourceEEheatAmbAggr,sinkEEheatAmbAggr
+      real(8), dimension(NhourYear) :: deltaEEheatWatAggr,sourceEEheatWatAggr,sinkEEheatWatAggr
+      real(8), dimension(NhourYear) :: deltaEEcoolAmbAggr,sourceEEcoolAmbAggr,sinkEEcoolAmbAggr
 
-      real(8) :: deltaEEelectrCityYear,sourceEEelectrCityYear,sinkEEelectrCityYear   
-      real(8) :: deltaEEheatAmbCityYear,sourceEEheatAmbCityYear,sinkEEheatAmbCityYear  
-      real(8) :: deltaEEheatWatCityYear,sourceEEheatWatCityYear,sinkEEheatWatCityYear  
-      real(8) :: deltaEEcoolAmbCityYear,sourceEEcoolAmbCityYear,sinkEEcoolAmbCityYear 
+      real(8) :: deltaEEelectrAggrYear,sourceEEelectrAggrYear,sinkEEelectrAggrYear   
+      real(8) :: deltaEEheatAmbAggrYear,sourceEEheatAmbAggrYear,sinkEEheatAmbAggrYear  
+      real(8) :: deltaEEheatWatAggrYear,sourceEEheatWatAggrYear,sinkEEheatWatAggrYear  
+      real(8) :: deltaEEcoolAmbAggrYear,sourceEEcoolAmbAggrYear,sinkEEcoolAmbAggrYear 
 
       character(len=19) :: timestamp
       character(len=19) :: temp 
@@ -75,10 +74,10 @@ program MultiEnSyst
 
       call CPU_TIME(t1)
 
-      iswitch = 0          ! <<< WIP: necessary for battery ageing
+      iswitch = 0             ! <<< WIP: necessary for battery ageing
       iswitchelectrolyzer = 0 ! <<< WIP: necessary for electrolyzer
       iswitchfuelcell     = 0 ! <<< WIP: necessary for fuelcell
-      AddHourlyData = 0.d0 ! <<< WIP: Initialization of AddHourlyData, where could it go?
+      AddHourlyData = 0.d0    ! <<< WIP: Initialization of AddHourlyData, should be moved
 
 
       ! Machine Precision
@@ -115,24 +114,15 @@ program MultiEnSyst
              '                    Double-> EpsD= 10^-',i2.2,/ )
 
 
-      ! Reading input data
-      ! ------------------
+      ! Pre-process
+      ! Data read and stored in corresponding modules
+      ! ---------------------------------------------
 
-      ! Global parameters
-      call ReadGlobalParam()
-      ! Ambient
-      call ReadAmbData()
-      ! Electrical demand
-      call ReadDemWel()
-      ! Thermal demand
-      call ReadDemTherm()
-      ! Energy prices
-      call ReadEnPrices()
-      ! City structure
-      call ReadCity()
+      call ReadInputs()
+      
 
 
-      ! Calling outern layer: city
+      ! Calling outern layer: aggregate
       ! --------------------------
 
       !VAN0 = 0.d0 ! se vuoi mettere icase =1,1
@@ -140,41 +130,41 @@ program MultiEnSyst
 
       do icase=0,1
 
-      GasConsumpCity         = 0.d0
+      GasConsumpAggr         = 0.d0
 
-      call city(deltaEEelectr,sourceEEelectr,sinkEEelectr,    & ! Single building hourly energy balances
+      call solver(deltaEEelectr,sourceEEelectr,sinkEEelectr,    & ! Single location hourly energy balances
                 deltaEEheatAmb,sourceEEheatAmb,sinkEEheatAmb, &
                 deltaEEheatWat,sourceEEheatWat,sinkEEheatWat, &
                 deltaEEcoolAmb,sourceEEcoolAmb,sinkEEcoolAmb, &
 
-                deltaEEelectrCity,sourceEEelectrCity,sinkEEelectrCity,    & ! Whole city hourly energy balances
-                deltaEEheatAmbCity,sourceEEheatAmbCity,sinkEEheatAmbCity, &
-                deltaEEheatWatCity,sourceEEheatWatCity,sinkEEheatWatCity, &
-                deltaEEcoolAmbCity,sourceEEcoolAmbCity,sinkEEcoolAmbCity, &
+                deltaEEelectrAggr,sourceEEelectrAggr,sinkEEelectrAggr,    & ! Whole aggregate hourly energy balances
+                deltaEEheatAmbAggr,sourceEEheatAmbAggr,sinkEEheatAmbAggr, &
+                deltaEEheatWatAggr,sourceEEheatWatAggr,sinkEEheatWatAggr, &
+                deltaEEcoolAmbAggr,sourceEEcoolAmbAggr,sinkEEcoolAmbAggr, &
 
-                deltaEEelectrCityYear,sourceEEelectrCityYear,sinkEEelectrCityYear,    & ! Whole city whole year balances   
-                deltaEEheatAmbCityYear,sourceEEheatAmbCityYear,sinkEEheatAmbCityYear, &
-                deltaEEheatWatCityYear,sourceEEheatWatCityYear,sinkEEheatWatCityYear, &
-                deltaEEcoolAmbCityYear,sourceEEcoolAmbCityYear,sinkEEcoolAmbCityYear, &
+                deltaEEelectrAggrYear,sourceEEelectrAggrYear,sinkEEelectrAggrYear,    & ! Whole aggregate whole year balances   
+                deltaEEheatAmbAggrYear,sourceEEheatAmbAggrYear,sinkEEheatAmbAggrYear, &
+                deltaEEheatWatAggrYear,sourceEEheatWatAggrYear,sinkEEheatWatAggrYear, &
+                deltaEEcoolAmbAggrYear,sourceEEcoolAmbAggrYear,sinkEEcoolAmbAggrYear, &
 
-                curveNPV,               & !(O) andamento VAN (€)
+                curveNPV,               & !(O) NPV curve (€)
                 TotActInvest,           & !(O) Total actualized investment
-                EnBoughtOutCity,        &
-                EnSoldOutCity,          &
+                EnBoughtOutAggr,        &
+                EnSoldOutAggr,          &
 
-                GasConsumpCity)
+                GasConsumpAggr)
 
 
-        ! Saving VAN in the refernce case
+        ! Saving VAN in the reference case
 
         select case(icase)
         case(0)
           curveNPV0(0:Nstep)      = curveNPV(0:Nstep)
 
-          GasConsumpCity0         = GasConsumpCity
+          GasConsumpAggr0         = GasConsumpAggr
 
-          EnBoughtOutCity0        = EnBoughtOutCity
-          EnSoldOutCity0          = EnSoldOutCity
+          EnBoughtOutAggr0        = EnBoughtOutAggr
+          EnSoldOutAggr0          = EnSoldOutAggr
 
         end select
 
@@ -232,16 +222,16 @@ program MultiEnSyst
       open(unit=97,file='output_case0.out',form='formatted',status='UNKNOWN')
       rewind 97
       do i=1,NhourYear
-        write(97,9004),EnBoughtOutCity0(i),EnSoldOutCity0(i), &  
-                       GasConsumpCity0(i)
+        write(97,9004),EnBoughtOutAggr0(i),EnSoldOutAggr0(i), &  
+                       GasConsumpAggr0(i)
       enddo
 9004  format(3(f12.4,2x))
 
       open(unit=98,file='output_case1.out',form='formatted',status='UNKNOWN')
       rewind 98
       do i=1,NhourYear
-        write(98,9005),EnBoughtOutCity (i),EnSoldOutCity (i), &  
-                       GasConsumpCity (i)
+        write(98,9005),EnBoughtOutAggr (i),EnSoldOutAggr (i), &  
+                       GasConsumpAggr (i)
       enddo
 9005  format(3(f12.4,2x))
 
@@ -279,13 +269,13 @@ program MultiEnSyst
       open(unit=81,file='techinfo.csv',form='formatted',status='UNKNOWN')
       rewind 81
       write(81,9040,Advance = 'No') 'timestamp;'
-      do ii=1,Nbuild
+      do ii=1,Nloc
         do jj = 1,Nelem(ii)
           do kk = 1,MaxAddPar
-            if (ii.eq.Nbuild .and. jj.eq.Nelem(ii) .and. kk.eq.MaxAddPar) then
-              write(81,9041) ii,citytechs(ii,jj),kk
+            if (ii.eq.Nloc .and. jj.eq.Nelem(ii) .and. kk.eq.MaxAddPar) then
+              write(81,9041) ii,whichtechs(ii,jj),kk
             else
-              write(81,9042,Advance = 'No') ii,citytechs(ii,jj),kk
+              write(81,9042,Advance = 'No') ii,whichtechs(ii,jj),kk
             endif
           enddo
         enddo
@@ -297,10 +287,10 @@ program MultiEnSyst
       do ll = 1,NhourYear
         call hourtodate(RefYear,ll,timestamp)
         write(81,9070,Advance = 'No') timestamp
-        do ii = 1,Nbuild
+        do ii = 1,Nloc
           do jj = 1,Nelem(ii)
             do kk = 1,MaxAddPar
-              if (ii.eq.Nbuild .and. jj.eq.Nelem(ii) .and. kk.eq.MaxAddPar) then
+              if (ii.eq.Nloc .and. jj.eq.Nelem(ii) .and. kk.eq.MaxAddPar) then
                 write(81,9043) AddHourlyData(ii,jj,kk,ll)
               else
                 write(81,9044,Advance = 'No') AddHourlyData(ii,jj,kk,ll)
@@ -314,13 +304,13 @@ program MultiEnSyst
 9044  format(f0.3,';')
         
 
-      ! 5) Building balances
+      ! 5) location balances
 
-      open(unit=82,file='buildingsenergybalances.csv',form='formatted',status='UNKNOWN')
+      open(unit=82,file='locationsenergybalances.csv',form='formatted',status='UNKNOWN')
       rewind 82
       write(82,9040,Advance = 'No') 'timestamp;'
-      do ii = 1,Nbuild
-        if (ii.eq.Nbuild) then
+      do ii = 1,Nloc
+        if (ii.eq.Nloc) then
           write(82,9045) ii,ii,ii,ii,ii,ii,ii,ii,ii,ii,ii,ii
         else
           write(82,9046,Advance = 'No') ii,ii,ii,ii,ii,ii,ii,ii,ii,ii,ii,ii
@@ -330,8 +320,8 @@ program MultiEnSyst
       do ii = 1,NhourYear
         call hourtodate(RefYear,ii,timestamp)
         write(82,9070,Advance = 'No') timestamp
-        do jj = 1,Nbuild
-          if (jj.eq.Nbuild) then
+        do jj = 1,Nloc
+          if (jj.eq.Nloc) then
             write(82, 9047) deltaEEelectr(jj,ii),sourceEEelectr(jj,ii),sinkEEelectr(jj,ii),    &   
                             deltaEEheatAmb(jj,ii),sourceEEheatAmb(jj,ii),sinkEEheatAmb(jj,ii), &
                             deltaEEheatWat(jj,ii),sourceEEheatWat(jj,ii),sinkEEheatWat(jj,ii), &
@@ -357,7 +347,7 @@ program MultiEnSyst
 9048  format(12(f12.3,';'))
 
 
-      ! 6) City balances
+      ! 6) aggregate balances
 
       open(unit=83,file='cityenergybalances.csv',form='formatted',status='UNKNOWN')
       rewind 83
@@ -370,10 +360,10 @@ program MultiEnSyst
       do ii = 1,NhourYear
         call hourtodate(RefYear,ii,timestamp)
         write(83,9070,Advance = 'No') timestamp
-        write(83, 9052) deltaEEelectrCity(ii),sourceEEelectrCity(ii),sinkEEelectrCity(ii),    &   
-                        deltaEEheatAmbCity(ii),sourceEEheatAmbCity(ii),sinkEEheatAmbCity(ii), &
-                        deltaEEheatWatCity(ii),sourceEEheatWatCity(ii),sinkEEheatWatCity(ii), &
-                        deltaEEcoolAmbCity(ii),sourceEEcoolAmbCity(ii),sinkEEcoolAmbCity(ii)
+        write(83, 9052) deltaEEelectrAggr(ii),sourceEEelectrAggr(ii),sinkEEelectrAggr(ii),    &   
+                        deltaEEheatAmbAggr(ii),sourceEEheatAmbAggr(ii),sinkEEheatAmbAggr(ii), &
+                        deltaEEheatWatAggr(ii),sourceEEheatWatAggr(ii),sinkEEheatWatAggr(ii), &
+                        deltaEEcoolAmbAggr(ii),sourceEEcoolAmbAggr(ii),sinkEEcoolAmbAggr(ii)
       enddo
 
 9051  format(12a)
@@ -383,10 +373,6 @@ program MultiEnSyst
 9040  format(a10)
 9070  format(a19,';')
 
-
-       !7) Whole city whole year energy balances (probably useless, decide if worth adding)
-       !
-       !...
 
 
 
