@@ -1,4 +1,4 @@
-timestamp;1_EnBalanceElectr;1_EnProdElectr;1_EnConsElectr;1_EnBalanceAmbHeat;1_EnProdAmbHeat;1_EnConsAmbHeat;1_EnBalanceWatHeat;1_EnProdWatHeat;1_EnConsWatHeat;1_EnBalanceAmbCool;1_EnProdAmbCool;1_EnConsAmbCool
+timestamp;EnBalanceElectr;EnProdElectr;EnConsElectr;EnBalanceAmbHeat;EnProdAmbHeat;EnConsAmbHeat;EnBalanceWatHeat;EnProdWatHeat;EnConsWatHeat;EnBalanceAmbCool;EnProdAmbCool;EnConsAmbCool
 2019-01-01 00:00:00;       0.000;       0.000;       0.436;       0.000;       1.307;       1.307;       0.000;       0.000;       0.000;       0.000;       0.000;       0.000
 2019-01-01 01:00:00;      -0.690;       0.000;       1.141;       0.000;       1.438;       1.438;       0.000;       0.000;       0.000;       0.000;       0.000;       0.000
 2019-01-01 02:00:00;      -1.039;       0.000;       1.039;       0.000;       1.699;       1.699;       0.000;       0.000;       0.000;       0.000;       0.000;       0.000
