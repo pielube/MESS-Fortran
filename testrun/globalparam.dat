@@ -1,4 +1,4 @@
 2019    # Reference year for the simulation
 1       # Simulation starting time
 8760    # Simulation ending time
-0		# Battery life estimation: 0=frominput 1=rainflow
+0		# Battery life estimation: 0=default 1=ageing

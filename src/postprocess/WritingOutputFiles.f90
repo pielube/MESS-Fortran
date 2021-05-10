@@ -61,12 +61,12 @@ subroutine WriteOutputs(ActPBP,ProfInd,curveNPV0,curveNPV,deltaNPV,      &
 9015  format(f12.4)!,t15,': NPV(30)')
 
 
-      open(unit=96,file='NPVcompletedata.out',form='formatted',status='UNKNOWN')
-      rewind 96
-      do i=0,Nstep
-        write(96,*),curveNPV0(i),curveNPV(i),deltaNPV(i)
-      enddo
-9003  format(3(f15.4,2x))
+!      open(unit=96,file='NPVcompletedata.out',form='formatted',status='UNKNOWN')
+!      rewind 96
+!      do i=0,Nstep
+!        write(96,*),curveNPV0(i),curveNPV(i),deltaNPV(i)
+!      enddo
+!9003  format(3(f15.4,2x))
 
 
       open(unit=99,file='NPVcompletedata.csv',form='formatted',status='UNKNOWN')
@@ -77,50 +77,50 @@ subroutine WriteOutputs(ActPBP,ProfInd,curveNPV0,curveNPV,deltaNPV,      &
 9008  format(2(f15.4,','),f12.4)
 
 
-      ! 2) Reference year energy balances
-
-      open(unit=97,file='output_case0.out',form='formatted',status='UNKNOWN')
-      rewind 97
-      do i=1,NhourYear
-        write(97,9004),EnBoughtOutAggr0(i),EnSoldOutAggr0(i), &  
-                       GasConsumpAggr0(i)
-      enddo
-9004  format(3(f12.4,2x))
-
-      open(unit=98,file='output_case1.out',form='formatted',status='UNKNOWN')
-      rewind 98
-      do i=1,NhourYear
-        write(98,9005),EnBoughtOutAggr (i),EnSoldOutAggr (i), &  
-                       GasConsumpAggr (i)
-      enddo
-9005  format(3(f12.4,2x))
-
-
-      ! 3) Battery degradation
-
-      ! >>> TEMP: verifying how battery degradation works <<<
-      open(unit=89,file='batterydegr.out',form='formatted',status='unknown')
-      rewind 89
-      do i=1,13
-        write(89,9023),TempArrBattDeg(i)
-      enddo
-9023  format(f12.4)
-      ! >>> TEMP: verifying how battery degradation works <<<
+!      ! 2) Random aggregated energy balances (old)
+!
+!      open(unit=97,file='output_case0.out',form='formatted',status='UNKNOWN')
+!      rewind 97
+!      do i=1,NhourYear
+!        write(97,9004),EnBoughtOutAggr0(i),EnSoldOutAggr0(i), &  
+!                       GasConsumpAggr0(i)
+!      enddo
+!9004  format(3(f12.4,2x))
+!
+!      open(unit=98,file='output_case1.out',form='formatted',status='UNKNOWN')
+!      rewind 98
+!      do i=1,NhourYear
+!        write(98,9005),EnBoughtOutAggr (i),EnSoldOutAggr (i), &  
+!                       GasConsumpAggr (i)
+!      enddo
+!9005  format(3(f12.4,2x))
 
 
-      ! >>> TEMP: grafici battery degradation <<<
-      open(unit=88,file='SOHtemp.out',form='formatted',status='unknown')
-      rewind 88
-      do i=1,1565!NhourYear*Nyears
-        write(88,9024),SOHtempbis(i) !SOHtemp(i)
-      enddo
-9024  format(f12.4)
-      open(unit=87,file='ageing.out',form='formatted',status='unknown')
-      rewind 87
-      write(87,9025),totalccyc
-      write(87,9025),totalccal
-9025  format(f12.4)
-      ! >>> TEMP: grafici battery degradation<<<
+!      ! 3) Battery degradation
+!
+!      ! >>> TEMP: verifying how battery degradation works <<<
+!      open(unit=89,file='batterydegr.out',form='formatted',status='unknown')
+!      rewind 89
+!      do i=1,13
+!        write(89,9023),TempArrBattDeg(i)
+!      enddo
+!9023  format(f12.4)
+!      ! >>> TEMP: verifying how battery degradation works <<<
+!
+!
+!      ! >>> TEMP: grafici battery degradation <<<
+!      open(unit=88,file='SOHtemp.out',form='formatted',status='unknown')
+!      rewind 88
+!      do i=1,1565!NhourYear*Nyears
+!        write(88,9024),SOHtempbis(i) !SOHtemp(i)
+!      enddo
+!9024  format(f12.4)
+!      open(unit=87,file='ageing.out',form='formatted',status='unknown')
+!      rewind 87
+!      write(87,9025),totalccyc
+!      write(87,9025),totalccal
+!9025  format(f12.4)
+!      ! >>> TEMP: grafici battery degradation<<<
 
 
 
@@ -164,7 +164,7 @@ subroutine WriteOutputs(ActPBP,ProfInd,curveNPV0,curveNPV,deltaNPV,      &
 9044  format(f0.3,';')
         
 
-      ! 5) location balances
+      ! 5) Locations energy balances
 
       open(unit=82,file='locationsenergybalances.csv',form='formatted',status='UNKNOWN')
       rewind 82
@@ -207,7 +207,7 @@ subroutine WriteOutputs(ActPBP,ProfInd,curveNPV0,curveNPV,deltaNPV,      &
 9048  format(12(f12.3,';'))
 
 
-      ! 6) aggregate balances
+      ! 6) Aggregated energy balances
 
       open(unit=83,file='aggregatedenergybalances.csv',form='formatted',status='UNKNOWN')
       rewind 83
@@ -234,13 +234,5 @@ subroutine WriteOutputs(ActPBP,ProfInd,curveNPV0,curveNPV,deltaNPV,      &
 9070  format(a19,';')
 
 
-
-
-!      efficiency = 0.99d0
-!      SoC = 0.d0
-!      batteria1 = Battery(efficiency,SoC)
-!      write(*,*) batteria1%efficiency, batteria1%SoC
-!      call aggiornamentoSoC(batteria1)
-!      write(*,*) batteria1%efficiency, batteria1%SoC
 
 end subroutine WriteOutputs

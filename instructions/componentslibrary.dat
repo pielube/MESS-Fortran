@@ -1,0 +1,118 @@
+7         # Number of elements in the location (max 10)
+[DemWel]
+1         # Which column to choose in demand_Wel.dat
+1         # Which ref value to consider: 1 Max power [kW], 2 Mean power [kW], 3 Yealy en consump [kWh/year]
+3.300     # Actual ref value (demand scaled accordingly)
+[DemQth]
+1         # Which ref value to consider: 1 Max power [kW], 2 Mean power [kW], 3 Yealy en consump [kWh/year]
+4.646     # Actual ref value for ambient heating          
+6.285     # Actual ref value for sanitary water           
+0.000     # Actual ref value for process heat             
+6.288     # Actual ref value for ambient cooling         
+0.000     # Actual ref value for other (e.g. cooking gas)
+[SolPhoto]
+50.       # Photovoltaic panel area               [m^2]
+0.95      # Area fraction with active solar cells [-] default: 0.95 - 1.00
+0.20      # Module conversion efficiency          [-] default: 0.20 
+1250.     # Cost per kW photovoltaic panels       [eur/kW]
+[WindTurb]
+39.6      # Swept area          [m^2] e.g. 39.6 m^2 (Aircon 10/10 kW)
+0.45      # Efficiency          [-]   e.g. 0.45 (ca. 0.593*0.76, i.e. Betz*efficiency)
+10.       # Rated power         [kW]
+11.       # Rated wind speed    [m/s] e.g. 11.0 m/s (Aircon 10/10 kW)
+2.5       # Cut in wind speed   [m/s] e.g.  2.5 m/s (Aircon 10/10 kW)
+32.       # Cout out wind speed [m/s] e.g. 32.0 m/s (Aircon 10/10 kW)
+990.      # Cost per kW turbine [eur/kW]
+[SolColl]
+40.       # Flat solar collector area [m^2]
+0.80      # Heat removal factor       [-] default: 0.75-0.80
+0.80      # tau alfa Duffie eq. 5.9.3 [-] deafault: 0.80
+9.5       # Heat transfer coefficient [W/(m^2*K)] realistic value: 9.5 (Duffie pg.294)
+293.15    # Fluid temperature in      [K]
+xxx       # Cost per m^2 panels       [eur/m^2]
+0.        # Initial state of charge   [-]
+[AirCond]
+3.00      # COP cooling          [-]  (Energy Efficiency Ratio - EER) 
+4.00      # Cooling rated power  [kW] (funz. tra CRP*0.3 e CRP*1.5)
+650.      # AC cost              [eur/kW] 
+[HeatPump]
+3.00      # COP heating          [-]
+3.1       # Heating rated power  [kW]
+650.      # Heat pump cost       [eur/kW]
+[HVACel]
+1         # Index HVACel 0: both first heating, 1: both, first cooling 2: heating, 3: cooling
+3.8       # Heating COP nominal            [-]   
+2.9       # Cooling COP nominal            [-]
+88.       # Heating rated power nominal    [kW] 
+88.       # Max Heating HP Power           [kW]
+22.       # Min Heating HP Power           [kW]  
+74.2      # Cooling rated power nominal    [kW] 
+74.2      # Max Cooling HP Power           [kW]
+18.55     # Min Cooling HP Power           [kW]  
+325.      # Cost HVACel                    [€/kW]
+[HVACgas]
+1         # Index HVACgas 0: both first heating, 1: both, first cooling 2: heating, 3: cooling
+1         # Index Recovery 0: OFF 1: ON
+1.47      # Heating PER nominal             [-]   
+95.       # Heating rated power nominal     [kW]
+95.       # Max HP Power                    [kW] 
+23.75     # Min HP Power                    [kW]
+1.22      # Cooling PER nominal             [-] 
+85.       # Cooling rated power nominal     [kW] 
+85.       # Max Cooling HP Power            [kW]
+21.25     # Min Cooling HP Power            [kW]  
+30.       # Recovery heat nominal           [kW]
+500.      # Cost     
+[ElChiller]
+316.9     # CapacityP_frigo_nom [kW]
+79.225    # CapacityP_frigo_min [kW]
+316.9     # CapacityP_frigo_max [kW]
+4.815     # COP_nom             [-]
+30.       # PowerFanElChiller   [kW]
+600.      # Cost_El_Chiller     [eur/kW]  
+[SimpBatt]
+3.00      # Battery capacity            [kWh]
+0.95      # Maximum SoC                 [-] default: 0.95
+0.80      # Depth Of Discharge          [-] default: 1.00 Note: MinSoC = 1 - DoD
+0.95      # Efficiency of the battery   [-] default: 0.95
+0.50      # Initial State of Charge     [-] default: 0.50
+1.00      # Initial State of Health     [-] default: 1.00
+200       # Cost per kWh simple battery [eur/kWh] default: 393 from JRC EU
+[HydrogenSystem]
+10.		  # CellNumber       [-]      Electrolyzer
+100.	  # CellActiveArea   [cm^2]        
+1.        # MaxCurrDensity   [A/cm^2]       
+2.		  # Nominal power    [kW]
+333.15    # OperatingTemp    [K]
+100000.   # AnodePressure    [Pa]
+5000000.  # OperatingPress   [Pa]
+2300.     # ElectrolyzerCost [eur/kW]
+72.       # CellNumber	     [-]      Fuel cell
+37.       # CellArea	     [cm^2]      
+2.3  	  # MaxCurrDens      [A/cm^2]     	
+3.	      # Nominal power    [kW]
+338.15    # OperatingTemp    [K]         
+101325.   # FuelPress        [Pa]
+101325.   # AirPress         [Pa]
+1200.     # Cost             [eur/kW]	
+6.        # TankVolume       [m^3]    Storage tank
+6000000.  # MaxWorkPress     [Pa]
+500.      # CostTank         [eur/kg]
+0.0       # Initial SoC      [-]
+[CCHP]
+0         # Index CCHP 0:CHP, 1: CCHP
+520.      # Electric Capacity nominal           [kW]  
+260.      # Min Power                           [kW]  
+520.      # Max Power                           [kW]  
+0.388     # Electrical efficiency               [-]
+0.483     # Thermal efficiency                  [-]
+800.      # Frigo Capacity nominal              [kW]  
+200.      # Min Frigo Power                     [kW]  
+800.      # Max Frigo Power                     [kW]  
+0.7       # Abs chiller nominal efficiency      [-]
+36.       # Nominal Power fan                   [kW]
+650.      # Cost Cogeneration                   [€/kW]
+400.      # Cost Abs Chiller                    [€/kW]           
+[Boiler]
+0.95       # Boiler efficiency [-]
+440.       # Cost per hourly kWp (significantly lower than real kWp, higher cost) [eur/kW]
