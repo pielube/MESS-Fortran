@@ -1,8 +1,7 @@
 
 ! Hydrogen subroutine: electricity to electricity
 ! Electrolyzer + Storage + Fuel cell
-! Grazzini, Lubello Feb 2021
-
+! Grazzini, Lubello: feb 2021
 
 subroutine HydrogenSystem(DeltaEnergy,           & ! (IO)  Electrical energy balance    [kWh]
                           SoC,                   & ! (IO)  State of Charge              [-]

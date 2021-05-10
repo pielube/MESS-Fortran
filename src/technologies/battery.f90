@@ -45,12 +45,9 @@ subroutine SimpleBattery(CapacityNom,    & ! (I)  Capacity of the battery     [k
       ChargeMin      = 1.d0 - DoD                     ! [-]
 
 
-      if (deltaProdDem .ge. 0.d0) then
-        ! More energy produced than consumed -> Battery charging or selling (if full)
+      if (deltaProdDem .ge. 0.d0) then ! More energy produced than consumed -> Battery charging or selling (if full)
 
-
-        ! etaBatt function of Crate - charging
-        ! >>> WIP: to be improved <<<
+        ! etaBatt function of Crate - charging <<< WIP: to be improved
         CRate = deltaProdDem/Capacity
         if(CRate .le. 0.2d0)then
           etaBatt = 1.d0
@@ -62,44 +59,32 @@ subroutine SimpleBattery(CapacityNom,    & ! (I)  Capacity of the battery     [k
           etaBatt = 0.95d0
         else
         endif
-        ! >>> WIP: to be improved <<<
-
 
         Charge = StartingCharge + deltaProdDem*etaBatt ! [kWh] Temp battery charge level, might be > Capacity*SoCmax
 
-        if (Charge .gt. ChargeMax*Capacity) then
-          ! Battery full, selling
+        if (Charge .gt. ChargeMax*Capacity) then ! Battery full, selling
           deltaProdDem = (Charge - ChargeMax*Capacity)/etaBatt
           Charge       =  ChargeMax*Capacity
-        else
-          ! Battery charging
+        else ! Battery charging
           deltaProdDem =  0.d0
         endif
 
-      else
-        ! Less energy produced than consumed -> Battery discharging or buying (if empty)
+      else ! Less energy produced than consumed -> Battery discharging or buying (if empty)
 
-
-        ! etaBatt function of Crate - discharging
-        ! >>> WIP: to be improved <<<
+        ! etaBatt function of Crate - discharging <<< WIP: to be improved
         CRate = -deltaProdDem/Capacity
         etaBatt = -0.0535d0*CRate+0.999d0
-        
         if(etaBatt .le. 0.95d0)then
           etaBatt = 0.84d0
         else
         endif
-        ! >>> WIP: to be improved <<<
-
 
         Charge = StartingCharge + deltaProdDem/etaBatt ! [kWh] Temp battery charge level, might be < Capacity*SoCmin
 
-        if (Charge .lt. ChargeMin*Capacity) then
-          ! Battery empty, buying
+        if (Charge .lt. ChargeMin*Capacity) then ! Battery empty, buying
           deltaProdDem = (Charge - ChargeMin*Capacity)*etaBatt
           Charge       =  ChargeMin*Capacity
-        else
-          ! Battery discharging
+        else ! Battery discharging
           deltaProdDem =  0.d0
         endif
 
@@ -120,10 +105,15 @@ subroutine SimpleBattery(CapacityNom,    & ! (I)  Capacity of the battery     [k
 
       !------------ Ageing -----------------
 
+      if(IndAgeing.eq.0)then
+        goto 1000
+      else
+      endif
 
-      ! Battery temperature (is it ok to consider it = to ambient where the battery is stored temperature?)
-      TempModif     = 0.714d0*TempAmb(itime)  + 4.28d0 !-20 a 50 -> -10 a 40 i.e. esterno/garage non condizionato
-      !TempModif     = 0.1429*TempAmb(itime) + 17.857 !-20 a 50 -> 15 a 25 i.e. interno
+
+      ! Battery temperature 
+      TempModif     = 0.714d0*TempAmb(itime)  + 4.28d0 !-20 a 50 -> -10 a 40 i.e. sheltered outdoor / garage
+      !TempModif     = 0.1429*TempAmb(itime) + 17.857 !-20 a 50 -> 15 a 25 i.e. inside
       TempModifKelv = TempModif + 273.15d0
 
       ! Calendar (shelf) ageing parameters
@@ -165,11 +155,9 @@ subroutine SimpleBattery(CapacityNom,    & ! (I)  Capacity of the battery     [k
       ! ParTempSoC would result negative, hance SoH would improve
       endif
 
-
-
-      ! Storing weekly charge history and calling battery ageing once a week
+      ! Storing weekly charge history and calling cyclic ageing once a week
       
-      if(IndAgeing.eq.1 .and. icase.eq.1) then  ! icase = 1 dovrebbe essere ridondante, se non è 0 non siamo qui dentro
+      if(IndAgeing.eq.1 .and. icase.eq.1) then  ! icase = 1 should be redundant, no battery in case 0
         ! Ageing active and not baseline case, then storing SoC for each week hour
         WeeklyChargeHist(itimeperweek,iloc) = SoC
 
@@ -203,8 +191,7 @@ subroutine SimpleBattery(CapacityNom,    & ! (I)  Capacity of the battery     [k
 
       SOHBattery(iloc) = 1.d0 - ccyc(iloc)*0.3d0 - ccal(iloc) 
 
-
-      ! >>>TEMP: grafici
+      ! >>>TEMP: more outputs for graphs
       tempNumber = (itime+(iyear-1)*Nhouryear)/(Nhourweek)
       if(tempNumber - dble(int(tempNumber)) .lt. 0.00001)then
         SOHtempbis(int(tempNumber)+1) = SOHBattery(iloc)
@@ -212,9 +199,7 @@ subroutine SimpleBattery(CapacityNom,    & ! (I)  Capacity of the battery     [k
       endif
 
       SOHtemp(itime+(iyear-1)*Nhouryear)=SOHBattery(iloc)
-      ! >>>TEMP: grafici
-
-
+      ! >>>TEMP: more outputs for graphs
 
 
 1000  return

@@ -30,7 +30,7 @@ subroutine solver(deltaEEelectr,sourceEEelectr,sinkEEelectr,    & ! Single locat
       USE MODGlobalParam, ONLY: iTimeStart,iTimeEnd,IndAgeing
       USE MODparam,       ONLY: NdayYear,NhourDay,NhourWeek,NhourYear,Nyears,Nstep,MaxComp,Maxloc,MaxGiorni,MaxHours
       USE MODambient,     ONLY: TempAmb,AirDens,SolIrr,WindSpeed,RelHumidity
-      USE MODAggr,        ONLY: Nloc, locName
+      USE MODlocation,    ONLY: Nloc, locName
 
       implicit real(8) (a-h,o-z), integer(i-n)
 

@@ -92,25 +92,15 @@ Module MODprices
 end Module MODprices
 
 
-! aggregate info module
-
-module MODAggr
-
-  USE MODparam, ONLY: Maxloc
-
-  integer :: Nloc                               ! Number of locations
-  character(15), dimension(Maxloc) :: locName ! Array of location names
-
-
-end module
-
-! location info module
+! Locations info module
 
 module MODlocation
 
   USE MODparam, ONLY: Maxloc
 
-  integer, dimension(Maxloc) :: Nelem
+  integer                          :: Nloc    ! Number of locations
+  character(15), dimension(Maxloc) :: locName ! Array of location names
+  integer,       dimension(Maxloc) :: Nelem   ! Number of technologies per location
 
 end module
 

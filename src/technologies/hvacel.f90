@@ -210,7 +210,6 @@ subroutine HVACel(IndexHVACel,       & ! (I) 0: both first heating, 1: both, fir
       endif	  
 	  
 	 
-
       ! Capex expenditure
       if(IndexHVACel.eq.0 .or. IndexHVACel.eq.1 .or. IndexHVACel.eq.2)then
         CapexHVACel = CostHVACel*CapacityhP_nom  

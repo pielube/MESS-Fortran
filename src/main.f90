@@ -42,11 +42,12 @@ program MESS2021
       ! Program version
 
       character( 9), parameter ::Version= &     
-              !'0.00.00.a'   ! First 2021 version            15/02/2021 PL
-               '0.01.00.a'   ! Added new components          31/03/2021 PL
-               !-.--.--.-|<-Formatted till here
+              !'0.01.00'   ! First 2021 version                 15/02/2021 PL
+              !'0.01.01'   ! Added new components               31/03/2021 PL
+               '0.01.02'   ! Minor improvements for readability 10/05/2021 PL
+               !-.--.--|<-Formatted till here
 
-      character(10), parameter ::DateVer= '31/03/2021'   ! Release date
+      character(10), parameter ::DateVer= '10/05/2021'   ! Release date
                                           !dd/mm/yyyy|<-Formatted till here
 
       ! Machine Precision
@@ -102,9 +103,9 @@ program MESS2021
       do icase=0,1
 
       if(icase.eq.0)then
-        write(*,*) " Reference case"
+        write(*,*) "Reference case"
       else
-        write(*,*) " User defined case"
+        write(*,*) "User defined case"
       endif
 
       GasConsumpAggr         = 0.d0

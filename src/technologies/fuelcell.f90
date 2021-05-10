@@ -1,4 +1,6 @@
 
+! Fuel cell subroutine
+! Grazzini, Lubello: feb 2021
 
 Subroutine FuelCell(DeltaEnergy,       & ! (I)  electrical energy balance     [kWh]
                     FC_CellNumber,     & ! (I) n° of fuel cells           [-]

@@ -18,8 +18,7 @@ subroutine WriteOutputs(ActPBP,ProfInd,curveNPV0,curveNPV,deltaNPV,      &
       USE MODwhichtechs, ONLY: whichtechs
       USE MODAddHourlyData, ONLY: AddHourlyData
       USE MODparam, ONLY: NhourYear,Nstep,Maxloc,MaxGiorni,MaxAddPar
-      USE MODAggr,     ONLY: Nloc
-      USE MODlocation, ONLY: Nelem
+      USE MODlocation, ONLY: Nloc,Nelem
       USE MODglobalparam, ONLY: RefYear
       USE MODbattery,     ONLY: TempArrBattDeg,SOHtemp,SOHtempbis,totalccal,totalccyc !<<< WIP: temporary, to be removed
 
