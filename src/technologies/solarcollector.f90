@@ -5,7 +5,6 @@
 ! References
 ! 1) Duffie, J. A., & Beckman, W. A. (2013). Solar engineering of thermal processes. John Wiley & Sons. Chapter 6, pg.290
 
-
 subroutine SolarColl(Area,        & ! (I)  Flat solar collector area       [m^2]
                      Fr,          & ! (I)  Collector heat removal factor   [-] default: 0.75-0.80
                      SolIrr,      & ! (I)  Solar irradiance                [W/m^2]
@@ -32,15 +31,16 @@ subroutine SolarColl(Area,        & ! (I)  Flat solar collector area       [m^2]
 
       ! Tank sizing and initial charge
 
-      VolTank  = Area*75.d0/1.d3                                   ! [m3]
+      VolTank  = Area*75.d0/1.d3                                      ! [m3]
       Capacity = VolTank*rhoStdh2o*cpH2O*(60.d0-45.d0)/dble(NsecHour) ! [kWh]
-      Charge   = Capacity *SoC                                     ! [kWh]
+      Charge   = Capacity *SoC                                        ! [kWh]
 
 
       ! Power (converted to energy) produced by the panels
 
       Rad = SolIrr*TauAlpha ! [W/m2]
       Disp = Ul*(Tin-Tair)  ! [W/m2]
+
       if(Rad .gt. Disp) then
         QQ = Area*Fr*(Rad-Disp)/1.d3 ! [kW]
       else
@@ -78,9 +78,7 @@ subroutine SolarColl(Area,        & ! (I)  Flat solar collector area       [m^2]
       SoC = Charge/Capacity
 
 
-      ! Capex expenditure
-
-      CapexSolColl = Area*CostSolColl
+      CapexSolColl = Area*CostSolColl ! Capex
 
        return
 

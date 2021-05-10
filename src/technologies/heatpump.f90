@@ -4,7 +4,7 @@
 
 subroutine HeatPump(COPh,         & ! (I) COP heating             [-]
                     QQheatRatedP, & ! (I) Heating rated power     [kW]
-                    CostHeatPump, & ! (I) Cost         [eur]
+                    CostHeatPump, & ! (I) Cost                    [eur/kW]
                     QQheatDem,    & ! (I) Heat demand             [kWh]
                     QQheatOut,    & ! (O) Heating effect          [kWh]
                     ElEnConsump,  & ! (O) Electricity consumption [kWh]
@@ -24,9 +24,6 @@ subroutine HeatPump(COPh,         & ! (I) COP heating             [-]
       QQheatRated = QQheatRatedP*timestep ![kWh]
       QQheatDemPos = - QQheatDem
 
-
-      ! Heat pump calculations
-
         if(QQheatDemPos .eq. 0.d0)then
           QQheatOut   = 0.d0
           ElEnConsump = 0.d0
@@ -41,11 +38,7 @@ subroutine HeatPump(COPh,         & ! (I) COP heating             [-]
           ElEnConsump = QQheatOut/COPh
         endif
 
-
-      ! Capex expenditure
-
-      CapexHeatPump = CostHeatPump*QQheatRatedP
-
+      CapexHeatPump = CostHeatPump*QQheatRatedP ! Capex
 
       return
 

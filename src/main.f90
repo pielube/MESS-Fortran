@@ -101,6 +101,12 @@ program MESS2021
 
       do icase=0,1
 
+      if(icase.eq.0)then
+        write(*,*) " Reference case"
+      else
+        write(*,*) " User defined case"
+      endif
+
       GasConsumpAggr         = 0.d0
 
       call solver(deltaEEelectr,sourceEEelectr,sinkEEelectr,    & ! Single location hourly energy balances
@@ -136,8 +142,8 @@ program MESS2021
       enddo ! icase
 
 
-      ! 3) Economic analysis
-      !    -----------------
+      ! 3) Economic analysis post-process
+      !    ------------------------------
 
       call NPVcalc(curveNPV0,    & ! (I) NPV case 0
                    curveNPV,     & ! (I) NPV case 1
@@ -146,9 +152,13 @@ program MESS2021
                    ActPBP,       & ! (O) Actualized payback period
                    ProfInd)        ! (O) Profit index
 
+      call CPU_TIME(t2)
+      write(*,*) " "
+      write(*,9004),t2-t1
+9004  format(' Solving took',f8.4,' seconds')
 
-      ! 4) Post-process
-      !    Exporting output data   
+
+      ! 4) Exporting output data   
       !    ---------------------
 
       call WriteOutputs(ActPBP,ProfInd,curveNPV0,curveNPV,deltaNPV,      &
@@ -164,10 +174,11 @@ program MESS2021
                         deltaEEcoolAmbAggr,sourceEEcoolAmbAggr,sinkEEcoolAmbAggr)
  
 
-      call CPU_TIME(t2)
-
-      write(*,9006),t2-t1
-9006  format(' Time of operation was',f8.4,' seconds')
+      call CPU_TIME(t3)
+      write(*,9005),t3-t2
+9005  format(' Writing results took',f8.4,' seconds')
+      write(*,9006),t3-t1
+9006  format(' Total time of operation was',f8.4,' seconds')
 
 
       stop ' Apparently everything went well!'

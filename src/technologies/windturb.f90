@@ -2,7 +2,6 @@
 ! Wind turbine subroutine
 ! Lubello: jan 2020
 
-
 subroutine WindTurb(rho,              & ! (I) Air density                       [kg/m^3]
                     WindSpeed,        & ! (I) Wind speed                        [m/s]
                     SweptArea,        & ! (I) Swept area                        [m^2] e.g. 39.6 m^2 (Aircon 10/10 kW)
@@ -25,32 +24,23 @@ subroutine WindTurb(rho,              & ! (I) Air density                       
       WWel          = 0.d0
       CapexWindTurb = 0.d0
 
-      if(WindSpeed.ge.CutIn .and. &
-         WindSpeed.le.CutOut) then
-        ! Wind speed allows the turbine to produce power
-        if(WindSpeed.gt.RatedWindSpeed)then
-          ! Wind speed higher than rated wind speed, max power produced
+      if(WindSpeed.ge.CutIn .and. WindSpeed.le.CutOut) then ! Wind speed allows the turbine to produce power
+
+        if(WindSpeed.gt.RatedWindSpeed)then ! Wind speed higher than rated wind speed, max power produced
           WWel = RatedPower
-        else
-          ! Wind speed higher lower rated wind speed, power according to Betz
+        else ! Wind speed higher lower rated wind speed, power according to Betz
           WWel = 0.5d0*rho*SweptArea*WindSpeed**3*etaWindTurb/1.d3
         endif
 
-      elseif(WindSpeed.lt.CutIn)then
-        ! Wind speed lower than cut in speed, power=0
+      elseif(WindSpeed.lt.CutIn)then ! Wind speed lower than cut in speed, power=0
         WWel = 0.d0
-
-      else
-        ! Wind speed higher than cut out speed, power=0
+      else ! Wind speed higher than cut out speed, power=0
         WWel = 0.d0
-
       endif
 
+      WWel = WWel * timestep ! [kWh] Energy produced
 
-      WWel = WWel * timestep ! [kWh]
-
-      ! Capex exp for the wind turbine
-      CapexWindTurb = CostWindTurb*RatedPower
+      CapexWindTurb = CostWindTurb*RatedPower ! [eur] Capex
 
       return
 
