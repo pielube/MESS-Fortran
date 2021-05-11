@@ -4,7 +4,7 @@
 
 subroutine AirCond(COPc,         & ! (I) COP cooling             [-]
                    QQcoolRatedP, & ! (I) Cooling rated power     [kW]
-                   CostAirCond,  & ! (I) Cost  TEMP: capex       [eur]
+                   CostAirCond,  & ! (I) Cost                    [eur/kW]
                    QQcoolDem,    & ! (I) Cooling demand          [kWh]
                    QQcoolOut,    & ! (O) Cooling effect          [kWh]
                    ElEnConsump,  & ! (O) Electricity consumption [kWh]
@@ -24,16 +24,13 @@ subroutine AirCond(COPc,         & ! (I) COP cooling             [-]
       QQcoolRated = QQcoolRatedP*timestep ![kWh]
       QQcoolDemPos = - QQcoolDem
 
-
-      ! Air conditioner calculations
-
-        if(QQcoolDemPos .eq. 0.d0)                    then
+        if(QQcoolDemPos .eq. 0.d0)then
           QQcoolOut   = 0.d0
           ElEnConsump = 0.d0
-        elseif(QQcoolDemPos .gt. QQcoolRated*factMax) then
+        elseif(QQcoolDemPos .gt. QQcoolRated*factMax)then
           QQcoolOut   = QQcoolRated*factMax
           ElEnConsump = QQcoolOut/COPc
-        elseif(QQcoolDemPos .lt. QQcoolRated*factMin) then
+        elseif(QQcoolDemPos .lt. QQcoolRated*factMin)then
           QQcoolOut   = QQcoolDemPos
           ElEnConsump = QQcoolRated*factMin/COPc
         else
@@ -41,10 +38,7 @@ subroutine AirCond(COPc,         & ! (I) COP cooling             [-]
           ElEnConsump = QQcoolOut/COPc
         endif
 
-
-      ! Capex expenditure
-
-      CapexAirCond = CostAirCond*QQcoolRatedP
+      CapexAirCond = CostAirCond*QQcoolRatedP ! Capex
 
       return
 

@@ -1,4 +1,6 @@
 
+! Electrolyzer subroutine
+! Grazzini, Lubello: feb 2021
 
 subroutine Electrolyzer(DeltaEnergy,        & ! (I)  electrical energy balance      [kWh]        
                         CellNumber,         & ! (I)  Stack cell number              [-]

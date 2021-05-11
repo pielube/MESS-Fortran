@@ -236,7 +236,7 @@ end subroutine ReadDemWel
 
 subroutine ReadDemTherm()
 
-      USE MODparam , ONLY: NhourYear,MaxTypDem
+      USE MODparam , ONLY: NhourYear
       USE MODdemand, ONLY: QQth               ! Thermal power demand structure
 
 
@@ -256,8 +256,7 @@ subroutine ReadDemTherm()
       iline=iline+1
       read(2,*,err=7010) QQth%ndata ! Number of data points
 
-      if(QQth%ndata.lt.1       .or. &
-         QQth%ndata.gt.NhourYear     )   then
+      if(QQth%ndata.lt.1 .or. QQth%ndata.gt.NhourYear)then
         write(*,*) 'Too many data points in ',namef
         stop 'Input data error!'
       endif
@@ -288,7 +287,6 @@ subroutine ReadDemTherm()
                            QQth%ProcessHeat(ii), &
                            QQth%AmbCool(ii),     &
                            QQth%OtherHeat(ii)
-
 
         ! Max and mean (P1) value comp
 
@@ -322,7 +320,6 @@ subroutine ReadDemTherm()
           if (QQth%MaxOtherHeat .eq. 0.d0)then
             QQth%MaxOtherHeat =-1.d10
           endif
-
 
       enddo
 
@@ -476,7 +473,7 @@ end subroutine ReadEnPrices
 subroutine ReadAggr()
 
       USE MODparam, ONLY: Maxloc
-      USE MODAggr,  ONLY: Nloc, locName
+      USE MODlocation,  ONLY: Nloc, locName
 
       implicit real(8) (a-h,o-z), integer(i-n)
 

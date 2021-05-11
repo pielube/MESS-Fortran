@@ -1,14 +1,13 @@
 
-! location subroutine
+! Location subroutine
 ! Lubello, Carcasci: dic 2019
-
 
 subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
                     AirDens,         & !(I) Air density         [kg/m3]
                     SolIrr,          & !(I) Solar irradiance    [W/m2]
                     WindSpeed,       & !(I) Wind speed          [m/s]
                     RelHumdity,      & !(I) Relative humidity   [-]
-                    locName,       & !(I) location name
+                    locName,         & !(I) location name
                                      
                     deltaEEelectr,   & !(O) Electrical energy balance  [kWh]
                     sourceEEelectr,  & !(O) Electrical energy produced [kWh]
@@ -39,19 +38,16 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
                     ValData)           !(IO) 2-D array of columns->components rows->technology-specific parameters
 
 
-      USE MODcoord,           ONLY: icase,iyear,itime,iloc
-      USE MODGlobalParam,     ONLY: IndAgeing
-      USE MODparam,           ONLY: NhourYear,MaxComp
-      USE MODprices,          ONLY: elenPriceBuy,elenPriceSell,gasPriceHouseS ! >>> WIP: nel module ho prezzi diversi del gas a seconda della taglia dell'utenza, da recuperare
-      USE MODbattery,         ONLY: SoHBattery,ccyc,ccal,csum,tref_cal,ccal2, & ! >>> WIP: questo dovrà finire nel modulo battery
-                                    TempArrBattDeg
-      USE MODAddHourlyData,   ONLY: AddHourlyData
-      USE MODlocation,        ONLY: Nelem
-      USE MODwhichtechs, ONLY: whichtechs
-
+      USE MODcoord,         ONLY: icase,iyear,itime,iloc
+      USE MODGlobalParam,   ONLY: IndAgeing
+      USE MODparam,         ONLY: NhourYear,MaxComp
+      USE MODprices,        ONLY: elenPriceBuy,elenPriceSell,gasPriceHouseS               ! >>> WIP: see prices input
+      USE MODbattery,       ONLY: SoHBattery,ccyc,ccal,csum,tref_cal,ccal2,TempArrBattDeg ! >>> WIP: should be in battery's subroutine
+      USE MODAddHourlyData, ONLY: AddHourlyData
+      USE MODlocation,      ONLY: Nelem
+      USE MODwhichtechs,    ONLY: whichtechs
 
       implicit real(8) (a-h,o-z), integer(i-n)
-
 
       ! Argument declarations
 
@@ -72,13 +68,11 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
       integer,                               intent(INOUT) :: NValData
       real(8),       dimension(100,MaxComp), intent(INOUT) :: ValData
 
-
       ! Local declarations
 
-      integer,       dimension(    MaxComp)                :: IndCase
-      character(15)                                        :: locNameTemp
-      character(20)                                        :: StringAux
-
+      integer,      dimension(MaxComp) :: IndCase
+      character(15)                    :: locNameTemp
+      character(20)                    :: StringAux
 
       ! Various inizializations
 
@@ -148,7 +142,7 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
             ! There is electrical demand! Saving ID and numb of inputs:
             ValData   (1,ii) = 01 !ID
             DataEconAn(1,ii) = 01 !ID
-            IndCase   (  ii) =  0 ! 0 = sara' simulato anche se icase =0
+            IndCase   (  ii) =  0 ! 0 => simulated when icase = 0
             Ndat=3  ! Number of inputs
             whichtechs(iloc,ii) = '01'
 
@@ -157,7 +151,7 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
             ! There is thermal demand! Saving ID and numb of inputs:
             ValData   (1,ii) = 02 !ID
             DataEconAn(1,ii) = 02 !ID
-            IndCase   (  ii) =  0 ! 0 = sara' simulato anche se icase =0
+            IndCase   (  ii) =  0 ! 0 => simulated when icase = 0
             Ndat=6  ! Number of inputs
             whichtechs(iloc,ii) = '02'
 
@@ -167,7 +161,7 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
             ! Photovoltaic panels exist! Saving ID and numb of inputs:
             ValData   (1,ii) = 03 !ID
             DataEconAn(1,ii) = 03 !ID
-            IndCase   (  ii) =  1 ! 1 = NON sara' simulato se icase =0
+            IndCase   (  ii) =  1 ! 1 => not simulated when icase = 0
             Ndat=4
             whichtechs(iloc,ii) = '03'
 
@@ -177,7 +171,7 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
             ! Wind turbine exists! Saving ID and numb of inputs:
             ValData(1,ii)    = 04 !ID
             DataEconAn(1,ii) = 04 !ID
-            IndCase   (  ii) =  1 !1 = NON sara' simulato se icase =0
+            IndCase   (  ii) =  1 ! 1 => not simulated when icase = 0
             Ndat=7 ! Number of inputs
             whichtechs(iloc,ii) = '04'
 
@@ -187,7 +181,7 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
             ! Solar collector exists! Saving ID and numb of inputs:
             ValData(1,ii)    = 05 !ID
             DataEconAn(1,ii) = 05 !ID
-            IndCase   (  ii) =  1 ! 1 = NON sara' simulato se icase =0
+            IndCase   (  ii) =  1 ! 1 => not simulated when icase = 0
             Ndat=7 ! Number of inputs
             whichtechs(iloc,ii) = '05'
 
@@ -197,7 +191,7 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
             ! Boiler exists! Saving ID and numb of inputs:
             ValData(1,ii)    = 06 !ID
             DataEconAn(1,ii) = 06 !ID
-            IndCase   (  ii) =  0 ! 0 = sara' simulato se icase =0
+            IndCase   (  ii) =  0 ! 0 => simulated when icase = 0
             Ndat=3 ! Number of inputs
             whichtechs(iloc,ii) = '06'
 
@@ -207,7 +201,7 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
             ! Boiler exists! Saving ID and numb of inputs:
             ValData(1,ii)    = 07 !ID
             DataEconAn(1,ii) = 07 !ID
-            IndCase   (  ii) =  1 ! 1 = NON sara' simulato se icase =0
+            IndCase   (  ii) =  1 ! 1 => not simulated when icase = 0
             Ndat=3 ! Number of inputs
             whichtechs(iloc,ii) = '07'
 
@@ -217,7 +211,7 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
             ! Boiler exists! Saving ID and numb of inputs:
             ValData(1,ii)    = 08 !ID
             DataEconAn(1,ii) = 08 !ID
-            IndCase   (  ii) =  1 ! 1 = NON sara' simulato se icase =0
+            IndCase   (  ii) =  1 ! 1 => not simulated when icase = 0
             Ndat=10 ! Number of inputs
             whichtechs(iloc,ii) = '08'
 
@@ -227,7 +221,7 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
             ! Boiler exists! Saving ID and numb of inputs:
             ValData(1,ii)    = 09 !ID
             DataEconAn(1,ii) = 09 !ID
-            IndCase   (  ii) =  1 ! 1 = NON sara' simulato se icase =0
+            IndCase   (  ii) =  1 ! 1 => not simulated when icase = 0
             Ndat=12 ! Number of inputs
             whichtechs(iloc,ii) = '09'
 
@@ -237,7 +231,7 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
             ! Boiler exists! Saving ID and numb of inputs:
             ValData(1,ii)    = 10 !ID
             DataEconAn(1,ii) = 10 !ID
-            IndCase   (  ii) =  1 ! 0 = sara' simulato anche se icase =0
+            IndCase   (  ii) =  1 ! 1 => not simulated when icase = 0
             Ndat=6 ! Number of inputs
             whichtechs(iloc,ii) = '10'
 
@@ -247,7 +241,7 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
             ! Simple battery exists! Saving ID and numb of inputs:
             ValData(1,ii)    = 11 !ID
             DataEconAn(1,ii) = 11 !ID
-            IndCase   (  ii) =  1 ! 1 = NON sara' simulato se icase =0
+            IndCase   (  ii) =  1 ! 1 => not simulated when icase = 0
             Ndat=7 ! Number of inputs
             whichtechs(iloc,ii) = '11'
 
@@ -257,7 +251,7 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
             ! Simple battery exists! Saving ID and numb of inputs:
             ValData(1,ii)    = 12 !ID
             DataEconAn(1,ii) = 12 !ID
-            IndCase   (  ii) =  1 ! 1 = NON sara' simulato se icase =0
+            IndCase   (  ii) =  1 ! 1 => not simulated when icase = 0
             Ndat=20 ! Number of inputs
             whichtechs(iloc,ii) = '12'
 
@@ -267,7 +261,7 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
             ! Boiler exists! Saving ID and numb of inputs:
             ValData(1,ii)    = 13 !ID
             DataEconAn(1,ii) = 13 !ID
-            IndCase   (  ii) =  1 ! 0 = sara' simulato anche se icase =0
+            IndCase   (  ii) =  1 ! 1 => not simulated when icase = 0
             Ndat=13 ! Number of inputs
             whichtechs(iloc,ii) = '13'
 
@@ -277,7 +271,7 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
             ! Boiler exists! Saving ID and numb of inputs:
             ValData(1,ii)    = 14 !ID
             DataEconAn(1,ii) = 14 !ID
-            IndCase   (  ii) =  0 ! 0 = sara' simulato anche se icase =0
+            IndCase   (  ii) =  0 ! 0 => simulated when icase = 0
             Ndat=2 ! Number of inputs
             whichtechs(iloc,ii) = '14'
 
@@ -314,7 +308,7 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
       do 1000 ii=1,Nelem(iloc)
 
         if(indCase(ii).gt.icase) then
-          !* non viene simulato
+          ! Skipping compoennts not to be simulated in case 0
           DataEconAn(2,ii) = 0.d0 
           DataEconAn(3,ii) = 0.d0   !capex
           goto 1000
@@ -324,16 +318,17 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
         ID=ValData(1,ii) !ID component of location
 
         select case(ID)
+
         case(01) ! [DemWel]
 
           Indtype=nint(ValData(2,ii))
           IndWel =nint(ValData(3,ii))
           Welinp =     ValData(4,ii)
 
-          call DemandWel(Indtype,   & ! (I) Indice tipologia utenza  (1=...))
-                         IndWel,    & ! (I) Indice potenza elettrica (1=Potenza [kW] massima, 2= Potenza media annuale[kW], 3= Energia annuale [kWh/y])
-                         Welinp,    & ! (I) Reference power
-                         WWel1)       ! (O) Energy demand at instant itime [kWh]
+          call DemandWel(Indtype,   & ! (I) Which profile to choose in demand_Wel.dat
+                         IndWel,    & ! (I) Which ref value to consider: 1 Max power [kW], 2 Mean power [kW], 3 Yealy en consump [kWh/year]
+                         Welinp,    & ! (I) Actual ref value (demand scaled accordingly)
+                         WWel1)       ! (O) Energy demand at given timestep [kWh]
 
           sinkEEelectr   = sinkEEelectr   + WWel1
           deltaEEelectr = sourceEEelectr - sinkEEelectr
@@ -353,10 +348,9 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
           QQAmbCoolIn     =     ValData(6,ii)
           QQOtherHeatIn   =     ValData(7,ii)
 
-          call DemandTherm(IndQth,                                                              & ! (I) Indice potenza termica (1=Potenza [kW] massima, 2= Potenza media annuale[kW], 3= Energia annuale [kWh/y])
-                           QQAmbHeatIn,QQWatHeatIn,QQProcessHeatIn,QQAmbCoolIn,QQOtherHeatIn,   & ! (I) Reference power
-                           QQAmbHeat,  QQWatHeat,  QQProcessHeat,  QQAmbCool,  QQOtherHeat)       ! (O) Energy demand at instant itime [kWh]
-
+          call DemandTherm(IndQth,                                                              & ! (I) Which ref value to consider: 1 Max power [kW], 2 Mean power [kW], 3 Yealy en consump [kWh/year]
+                           QQAmbHeatIn,QQWatHeatIn,QQProcessHeatIn,QQAmbCoolIn,QQOtherHeatIn,   & ! (I) Actual ref value (demand scaled accordingly)
+                           QQAmbHeat,  QQWatHeat,  QQProcessHeat,  QQAmbCool,  QQOtherHeat)       ! (O) Energy demand at given timestep [kWh]
 
           sinkEEheatAmb       = sinkEEheatAmb     + QQAmbHeat
           sinkEEheatWat       = sinkEEheatWat     + QQWatHeat
@@ -439,7 +433,7 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
           Ul          = ValData(5,ii)
           Tin         = ValData(6,ii)
           CostSolColl = ValData(7,ii)
-          SoCTank     = ValData(8,ii)   ! Initial State of Charge       [-]
+          SoCTank     = ValData(8,ii)
 
           QQdemSolColl = deltaEEheatWat ! Type of demand solar panels are used for
                                                                                           
@@ -486,15 +480,15 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
                        CostAirCond,        & ! (I) Cost  TEMP: capex       [eur]
                        QQcoolDemAirCond,   & ! (I) Cooling demand          [kWh]
                        QQcoolOutAirCond,   & ! (O) Cooling effect          [kWh]
-                       ElEnConsAC, & ! (O) Electricity consumption [kWh]
+                       ElEnConsAC,         & ! (O) Electricity consumption [kWh]
                        CapexAirCond)         ! (O) Capex                   [eur]
 
           ! electrical
-          sinkEEelectr   = sinkEEelectr + ElEnConsAC
+          sinkEEelectr  = sinkEEelectr + ElEnConsAC
           deltaEEelectr = sourceEEelectr - sinkEEelectr
 
           ! thermal
-          sourceEEcoolAmb     = sourceEEcoolAmb + QQcoolOutAirCond
+          sourceEEcoolAmb  = sourceEEcoolAmb + QQcoolOutAirCond
           deltaEEcoolAmb   = sourceEEcoolAmb - sinkEEcoolAmb
 
           AddHourlyData(iloc,ii,1,itime) = QQcoolOutAirCond
@@ -522,11 +516,11 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
                         CapexHeatPump)         ! (O) Capex                   [eur]
 
           ! electrical
-          sinkEEelectr   = sinkEEelectr + ElEnConsHP
+          sinkEEelectr  = sinkEEelectr + ElEnConsHP
           deltaEEelectr = sourceEEelectr - sinkEEelectr
 
-          ! thermal - heat pump only for ambient heat
-          sourceEEheatAmb    = sourceEEheatAmb + QQheatOutHeatPump
+          ! thermal
+          sourceEEheatAmb = sourceEEheatAmb + QQheatOutHeatPump
           deltaEEheatAmb  = sourceEEheatAmb - sinkEEheatAmb
 
           AddHourlyData(iloc,ii,1,itime) = QQheatOutHeatPump
@@ -639,7 +633,7 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
           sourceEEheatAmb = sourceEEheatAmb + ThProdHVACgas + Rec_Heat !**
           deltaEEheatAmb  = sourceEEheatAmb - sinkEEheatAmb
           !** Rec_Heat added here for Villa Donatello, where no distinction is made between ambient heating and hot water
-          !   If a distinction is made, even if same T level is used for both, Rec_Heat should be used for hot water when workins as cooling
+          !   If a distinction is made, even if same T level is used for both, Rec_Heat should be used for hot water when working as cooling
 
           ! cooling - only for ambient cooling
           sourceEEcoolAmb = sourceEEcoolAmb + CoolProdHVACgas
@@ -670,22 +664,21 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
 
           QQcoolDemElChiller = deltaEEcoolAmb
 
-          call El_Chiller(CapacityP_frigo_nom,   & ! (I) Frigo Capacity nominal [kW]  ! Power
-			        CapacityP_frigo_min,   & ! (I) Min Power              [kW]  ! Power
-			        CapacityP_frigo_max,   & ! (I) Max Power              [kW]  ! Power
-                          COPnomElChiller,       & ! (I) COP nominal            [-]
-	                    Cost_El_Chiller,       & ! (I) Cost                   [€/kW]
-		              PowerFanElChiller,     & ! (I) Nominal Power fan                   [kW]
-		              TempAmb,               & ! (I) Outdoor temperature    [°C]
-                          RelHumdity,            & ! (I) Relative humidity      [%]
-			        QQcoolDemElChiller,    & ! (I/O) Frigo Demand in      [kWh] ! energy balance
-	                    CoolProdElChiller,     & ! (O) Frigo production       [kWh]        
-			        ElConsElChiller,       & ! (O) Electric consumption   [kWh]
-			        ElConsFanElChiller,    & ! (O) Electric consumption fan            [kWh]
-			        COPElChiller,          & ! (O) COP real               [-]
-			        CapexElChiller)        ! (O) Capex                  [€]
+          call El_Chiller(CapacityP_frigo_nom,   & ! (I)  Frigo Capacity nominal   [kW] 
+			        CapacityP_frigo_min,   & ! (I)  Min Power                [kW] 
+			        CapacityP_frigo_max,   & ! (I)  Max Power                [kW]
+                          COPnomElChiller,       & ! (I)  COP nominal              [-]
+	                    Cost_El_Chiller,       & ! (I)  Cost                     [€/kW]
+		              PowerFanElChiller,     & ! (I)  Nominal Power fan        [kW]
+		              TempAmb,               & ! (I)  Outdoor temperature      [°C]
+                          RelHumdity,            & ! (I)  Relative humidity        [%]
+			        QQcoolDemElChiller,    & ! (IO) Frigo Demand in          [kWh] 
+	                    CoolProdElChiller,     & ! (O)  Frigo production         [kWh]        
+			        ElConsElChiller,       & ! (O)  Electric consumption     [kWh]
+			        ElConsFanElChiller,    & ! (O)  Electric consumption fan [kWh]
+			        COPElChiller,          & ! (O)  COP real                 [-]
+			        CapexElChiller)          ! (O) Capex                     [eur]
 
- 
           ! electrical
           sinkEEelectr   = sinkEEelectr + ElConsElChiller + ElConsFanElChiller
           deltaEEelectr = sourceEEelectr - sinkEEelectr
@@ -710,8 +703,8 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
           SoCBatteryMax =     ValData(3,ii)
           DoD           =     ValData(4,ii)
           etaBatt       =     ValData(5,ii)
-          SoCBattery    =     ValData(6,ii)      ! >>> WIP: Maybe this should work as SoHBattery <<<
-          if(itime.eq.1 .and. iyear.eq.1) then   ! >>> WIP: What if IndAgeing = 0? Verify it to be always = 1 <<<
+          SoCBattery    =     ValData(6,ii) ! >>> WIP: Maybe this should work as SoHBattery <<<
+          if(itime.eq.1 .and. iyear.eq.1)then
             SoHBattery   =    ValData(7,ii)
             ccal2 = 0.d0
             ccal(iloc) = 0.d0
@@ -721,7 +714,6 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
           else
           endif
           CostSimpBatt =      ValData(8,ii)
-
 
           deltaBatt = deltaEEelectr
 
@@ -735,7 +727,7 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
                              deltaBattery,   & ! (O)  Energy accumulated (<0) or produced (>0) [kWh]
                              CapexSimpBatt)    ! (O)  Battery cost                [eur]
 
-          ValData(6,ii) = SoCBattery   ! Updating the battery state of charge
+          ValData(6,ii) = SoCBattery
 
           !electricity
           deltaEEelectr = deltaBatt
@@ -846,7 +838,7 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
                               deltaHydrogenVolume,   & ! (O) Hydrogen produced (> 0) or consumed (< 0) [Sm3]
                               DeltaElectricalEnergy, & ! (O) El energy entering (< 0) or leaving (> 0) the system [kWh] 
                               
-                              !ComprPower,         & ! (O)  Power imput for compression  [kW]  
+                              !ComprPower,         & ! (O)  Power input for compression  [kW]  
                               !NewEtaElectr,       & ! (O)  New electrolyzer efficiency  [-]
                                                                                          
                               SystemCapex)           ! (O)  overall System capex         [eur] 
@@ -891,7 +883,7 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
           Cost_Abs_Chiller     = ValData(14,ii)
 
           ElBalance   = deltaEEelectr
-          ThBalance   = deltaEEheatAmb !+ deltaEEheatWat ! RIVEDERE: per ora solo riscaldamento ambiente, acqua calda? Modificare anche bilanci sotto
+          ThBalance   = deltaEEheatAmb !+ deltaEEheatWat ! <<< WIP: right now only ambient heating, what about hot water?
           CoolBalance = deltaEEcoolAmb
 
           call CCHP(IndexCCHP,           & ! (I) 0:CHP, 1: CCHP
@@ -982,26 +974,18 @@ subroutine location(TempAmb,         & !(I) Ambient temperature [°C]
 
 
 
-      ! Electrical energy part
-      ! ======================
-      ! deltaEEelectr is the electrical energy balance
-      ! Excess > 0, Deficiency < 0
 
+      ! deltaEEelectr is the electrical energy balance, Excess > 0, Deficiency < 0
       ! EnSoldOut and EnBoughtOut saved to keep track of how much energy is sold or bought throughout the year
       if(deltaEEelectr.ge.0.d0) then
-        ! deltaEEelectr >= 0
         EnSoldOut = deltaEEelectr
         enExpend = deltaEEelectr*elenPriceSell(itime)
       else
-        ! deltaEEelectr < 0
         EnBoughtOut = -deltaEEelectr
         enExpend = deltaEEelectr*elenPriceBuy(itime)
       endif
 
-      ! Thermal energy / gas part
-      ! =========================
       ! GasConsump is always >= 0, hence the - in the following equation:
-
       enExpendGas = - GasConsump*GasPriceHouseS(itime)
 
 

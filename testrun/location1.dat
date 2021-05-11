@@ -1,0 +1,36 @@
+7         # Number of elements in the location (max 10)
+[DemWel]
+1         # Which column to choose in demand_Wel.dat
+1         # Which ref value to consider: 1 Max power [kW], 2 Mean power [kW], 3 Yealy en consump [kWh/year]
+3.300     # Actual ref value (demand scaled accordingly)
+[DemQth]
+1         # Which ref value to consider: 1 Max power [kW], 2 Mean power [kW], 3 Yealy en consump [kWh/year]
+4.646     # Actual ref value for ambient heating          
+6.285     # Actual ref value for sanitary water           
+0.000     # Actual ref value for process heat             
+6.288     # Actual ref value for ambient cooling         
+0.000     # Actual ref value for other (e.g. cooking gas)
+[SolPhoto]
+50.       # Photovoltaic panel area               [m^2]
+0.95      # Area fraction with active solar cells [-] default: 0.95 - 1.00
+0.20      # Module conversion efficiency          [-] default: 0.20 
+1250.     # Cost per kW photovoltaic panels       [eur/kW]
+[AirCond]
+3.00      # COP cooling          [-]  (Energy Efficiency Ratio - EER) 
+4.00      # Cooling rated power  [kW] (funz. tra CRP*0.3 e CRP*1.5)
+650.      # AC cost              [eur/kW] 
+[HeatPump]
+3.00      # COP heating          [-]
+3.1       # Heating rated power  [kW]
+650.      # Heat pump cost       [eur/kW]
+[SimpBatt]
+3.00      # Battery capacity            [kWh]
+0.95      # Maximum SoC                 [-] default: 0.95
+0.80      # Depth Of Discharge          [-] default: 1.00 Note: MinSoC = 1 - DoD
+0.95      # Efficiency of the battery   [-] default: 0.95
+0.50      # Initial State of Charge     [-] default: 0.50
+1.00      # Initial State of Health     [-] default: 1.00
+200       # Cost per kWh simple battery [eur/kWh] default: 393 from JRC EU 
+[Boiler]
+0.95       # Boiler efficiency [-]
+440.       # Cost per hourly kWp (significantly lower than real kWp, higher cost) [eur/kW]
